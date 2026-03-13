@@ -1,7 +1,7 @@
 <h1 align="center">🎓 KYUNGSUNG STUDENT HUB</h1>
 
 <p align="center">
-경성대학교 학생들을 위한 커뮤니티 & 정보 공유 플랫폼
+경성대학교 학생들을 위한 학교 정보 공유 플랫폼
 </p>
 
 <p align="center">
@@ -16,10 +16,10 @@
 
 | Profile | Name | Role | GitHub |
 |------|------|------|------|
-| <img src="https://github.com/username.png" width="100"> | 장문용 | Back-end | https://github.com/username |
+| <img src="https://github.com/GUBBIB.png" width="100"> | 장문용 | Back-end | https://github.com/GUBBIB |
 | <img src="https://github.com/username.png" width="100"> | 남현호 | Back-end | https://github.com/username |
 | <img src="https://github.com/username.png" width="100"> | 신성우 | Front-end | https://github.com/username |
-| <img src="https://github.com/username.png" width="100"> | 이재협 | Front-end | https://github.com/username |
+| <img src="https://github.com/hyeopyday.png" width="100"> | 이재협 | Front-end | https://github.com/hyeopyday |
 
 ---
 # 📌 프로젝트 소개
@@ -28,7 +28,7 @@
 
 ### 🎯 목표
 
-- 학생의 편의성 증가
+- 학생의 ***편의성*** 증가
 ---
 
 # 🚀 주요 기능
