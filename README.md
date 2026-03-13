@@ -18,7 +18,7 @@
 |------|------|------|------|
 | <img src="https://github.com/GUBBIB.png" width="100"> | 장문용 | Back-end | https://github.com/GUBBIB |
 | <img src="https://github.com/username.png" width="100"> | 남현호 | Back-end | https://github.com/username |
-| <img src="https://github.com/username.png" width="100"> | 신성우 | Front-end | https://github.com/username |
+| <img src="https://github.com/sungwo0.png" width="100"> | 신성우 | Front-end | https://github.com/sungwo0 |
 | <img src="https://github.com/hyeopyday.png" width="100"> | 이재협 | Front-end | https://github.com/hyeopyday |
 
 ---
