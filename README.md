@@ -33,3 +33,14 @@
 
 # 🚀 주요 기능
 
+[//]: # (일단 요기다가 적어놓을게용 나중에 수정하셔도 됩니다
+Docker 사용법 이에요)
+# Docker 사용법
+
+**터미널 위치를 ``/FOR_KSUS_Docker`` 로 이동 후**
+
+## Container 설치
+```docker compose up -d ```
+
+## Container 삭제
+```docker compose down -v```
