@@ -19,6 +19,23 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
+        
+#  mail:
+#    host: "수정필요"
+#    port: 587
+#    username: "수정필요"
+#    password: "수정필요"
+#    properties:
+#      mail:
+#        smtp:
+#          auth: true
+#          starttls:
+#            enable: true
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 logging:
   pattern:
