@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 @Getter
 public enum ErrorCode {
 
+
     // 공통
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "C001", "서버 에러가 발생했습니다."),
     INVALID_INPUT_VALUE(HttpStatus.BAD_REQUEST, "C002", "요청 값이 유효하지 않습니다."),
@@ -25,6 +26,13 @@ public enum ErrorCode {
     AUTH_TOKEN_EXPIRED(HttpStatus.UNAUTHORIZED, "A006", "만료된 토큰입니다."),
     AUTH_PROVIDER_MISMATCH(HttpStatus.BAD_REQUEST, "A007", "제공자(provider)가 올바르지 않습니다."),
     AUTH_REFRESH_TOKEN_INVALID(HttpStatus.UNAUTHORIZED, "A008", "유효하지 않은 리프레시 토큰입니다."),
+    AUTH_ALREADY_VERIFIED(HttpStatus.CONFLICT, "A009", "이미 재학생 인증이 완료된 사용자 입니다."),
+    AUTH_VERIFICATION_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "A010", "인증 메일은 24시간 내 최대 3회까지 요청할 수 있습니다."),
+    AUTH_VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "A011", "인증 코드가 만료되었거나 존재하지 않습니다."),
+    AUTH_VERIFICATION_CODE_INVALID(HttpStatus.BAD_REQUEST, "A012", "인증 코드가 올바르지 않습니다."),
+
+    // Mail 관련
+    MAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "M001", "이메일 전송중에 오류가 발생했습니다."),
 
     // User 관련
     USER_NOT_FOUND(HttpStatus.NOT_FOUND, "U001", "존재하지 않는 사용자입니다."),
@@ -34,7 +42,8 @@ public enum ErrorCode {
     USER_STATUS_INACTIVE(HttpStatus.BAD_REQUEST, "U005", "비활성화된 사용자입니다."),
     USER_PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST, "U006", "비밀번호가 일치하지 않습니다."),
     USER_FORBIDDEN(HttpStatus.FORBIDDEN, "U007", "사용자 권한이 충분하지 않습니다."),
-    USER_SAME_AS_OLD_PASSWORD(HttpStatus.CONFLICT, "U008", "이전 비밀번호와 동일합니다.");
+    USER_SAME_AS_OLD_PASSWORD(HttpStatus.CONFLICT, "U008", "이전 비밀번호와 동일합니다."),
+    ;
 
     private final HttpStatus httpStatus;
     private final String code;
