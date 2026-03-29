@@ -46,10 +46,13 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
         if(user == null){
             isNewUser = true;
+            log.info("✅ [OAuth2] user={}, isNewUser={}", user,  isNewUser);
+            return new CustomUserPrincipal(attributes, isNewUser);
+        } else {
+            log.info("✅ [OAuth2] user={}, isNewUser={}", user,  isNewUser);
+            return new CustomUserPrincipal(user);
         }
-        log.info("✅ [OAuth2] user={}, isNewUser={}", user,  isNewUser);
 
-        return new CustomUserPrincipal(attributes, isNewUser);
 
     }
 }
