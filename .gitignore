@@ -38,4 +38,6 @@ out/
 
 ### Extras ###
 Back-End/src/test/
-
+.env
+.env-local
+.env-prod
