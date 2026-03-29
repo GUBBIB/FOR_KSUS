@@ -32,12 +32,15 @@ public class User extends BaseEntity {
     @Column(name = "nickname", nullable = false, unique = true, length = 255)
     private String nickname;
 
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(name="role", nullable = false,  length = 255, columnDefinition = "user_role")
+    @Column(name = "is_students", nullable = true)
+    private boolean isStudents;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name="role", nullable = false)
     private UserRole role = UserRole.USER;
 
-    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
-    @Column(name = "provider", nullable = false, length = 255, columnDefinition = "provider_type")
+    @Enumerated(EnumType.STRING)
+    @Column(name="provider", nullable = false)
     private Provider provider = Provider.LOCAL;
 
 
@@ -68,5 +71,7 @@ public class User extends BaseEntity {
     public void changePassword(String password){
         this.password = password;
     }
-
+    public void verifyStudent(){
+        this.isStudents = true;
+    }
 }
