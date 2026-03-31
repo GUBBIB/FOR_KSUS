@@ -30,6 +30,7 @@ public enum ErrorCode {
     AUTH_VERIFICATION_LIMIT_EXCEEDED(HttpStatus.TOO_MANY_REQUESTS, "A010", "인증 메일은 24시간 내 최대 3회까지 요청할 수 있습니다."),
     AUTH_VERIFICATION_CODE_EXPIRED(HttpStatus.BAD_REQUEST, "A011", "인증 코드가 만료되었거나 존재하지 않습니다."),
     AUTH_VERIFICATION_CODE_INVALID(HttpStatus.BAD_REQUEST, "A012", "인증 코드가 올바르지 않습니다."),
+    AUTH_VERIFICATION_EMAIL_INVALID(HttpStatus.BAD_REQUEST, "A013", "경성대학교 이메일이 아닙니다."),
 
     // Mail 관련
     MAIL_SEND_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "M001", "이메일 전송중에 오류가 발생했습니다."),
