@@ -112,18 +112,16 @@ public class AuthServiceImp implements AuthService {
 
     @Override
     @Transactional
-    public void sendVerificationMail(CustomUserPrincipal userPrincipal, StudentVerifyRequestDTO dto) {
-        User u = userService.checkUser(userPrincipal);
-
-        if(u.isStudents()){
-            throw new GlobalException(ErrorCode.AUTH_ALREADY_VERIFIED);
+    public void sendVerificationMail(StudentVerifyRequestDTO dto) {
+        if(!dto.email().matches("^[A-Za-z0-9._%+-]+@cs\\.ks\\.ac\\.kr$")){
+            throw new GlobalException(ErrorCode.AUTH_VERIFICATION_EMAIL_INVALID);
         }
 
         String code = generateCode();
 
-        studentVerificationService.increaseVerificationRequestCount(u.getEmail());
+        studentVerificationService.increaseVerificationRequestCount(dto.email());
         studentVerificationService.saveVerificationCode(
-                u.getEmail(),
+                dto.email(),
                 code,
                 Duration.ofMinutes(5)
         );
@@ -135,14 +133,8 @@ public class AuthServiceImp implements AuthService {
     }
 
     @Override
-    public void verifyStudent(CustomUserPrincipal userPrincipal, VerificationCodeDTO dto) {
-        User u = userService.checkUser(userPrincipal);
-
-        if(u.isStudents()){
-            throw new GlobalException(ErrorCode.AUTH_ALREADY_VERIFIED);
-        }
-
-        String savedCode = studentVerificationService.getVerificationCode(u.getEmail());
+    public void verifyStudent(VerificationCodeDTO dto) {
+        String savedCode = studentVerificationService.getVerificationCode(dto.email());
 
         if(savedCode == null){
             throw new GlobalException(ErrorCode.AUTH_VERIFICATION_CODE_EXPIRED);
@@ -152,9 +144,6 @@ public class AuthServiceImp implements AuthService {
             throw new GlobalException(ErrorCode.AUTH_VERIFICATION_CODE_INVALID);
         }
 
-        u.verifyStudent();
-        userRepository.save(u);
-
-        studentVerificationService.deleteVerificationCode(u.getEmail());
+        studentVerificationService.deleteVerificationCode(dto.email());
     }
 }

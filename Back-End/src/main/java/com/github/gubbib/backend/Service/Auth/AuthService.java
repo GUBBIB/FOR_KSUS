@@ -10,7 +10,7 @@ public interface AuthService {
     AuthResultDTO logout();
 
     String generateCode();
-    void sendVerificationMail(CustomUserPrincipal userPrincipal, StudentVerifyRequestDTO studentVerifyRequestDTO);
+    void sendVerificationMail(StudentVerifyRequestDTO studentVerifyRequestDTO);
 
-    void verifyStudent(CustomUserPrincipal userPrincipal, VerificationCodeDTO dto);
+    void verifyStudent(VerificationCodeDTO dto);
 }
