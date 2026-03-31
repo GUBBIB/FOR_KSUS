@@ -99,27 +99,71 @@ public class AuthController {
                 .build();
     }
 
+    @Operation(
+            summary = "학교 이메일 인증 코드 요청",
+            description = "cs.ks.ac.kr 도메인의 이메일로 인증 코드를 전송한다. 인증 코드는 5분간 유효하다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "인증 코드 전송 성공"),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 이메일 형식 또는 학교 이메일이 아님",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "429",
+                    description = "인증 요청 횟수 초과",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class))
+            )
+    })
     @PostMapping("/student/verify-request")
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<Void> requestStudentVerification(
             @AuthenticationPrincipal CustomUserPrincipal userPrincipal,
             @RequestBody StudentVerifyRequestDTO studentVerifyRequestDTO
     ) {
-        authService.sendVerificationMail(userPrincipal, studentVerifyRequestDTO);
+        authService.sendVerificationMail(studentVerifyRequestDTO);
 
-        return ResponseEntity.ok()
-                .build();
+        return ResponseEntity.ok().build();
     }
 
+    @Operation(
+            summary = "학교 이메일 인증 코드 검증",
+            description = "이메일로 전송된 인증 코드를 검증한다.")
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "학교 인증 성공",
+                    content = @Content(
+                            mediaType = "text/plain",
+                            schema = @Schema(example = "학교 인증 성공!"))
+            ),
+            @ApiResponse(
+                    responseCode = "400",
+                    description = "잘못된 인증 코드",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class))
+            ),
+            @ApiResponse(
+                    responseCode = "410",
+                    description = "인증 코드 만료",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class))
+            )
+    })
     @PostMapping("/student/verify")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<Void> verificationCode(
-            @AuthenticationPrincipal CustomUserPrincipal userPrincipal,
+    public ResponseEntity<String> verificationCode(
             @RequestBody VerificationCodeDTO verificationCodeDTO
     ){
-        authService.verifyStudent(userPrincipal, verificationCodeDTO);
+        authService.verifyStudent(verificationCodeDTO);
 
-        return ResponseEntity.noContent()
-                .build();
+        return ResponseEntity.ok("학교 인증 성공!");
     }
 }
