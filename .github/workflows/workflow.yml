@@ -1,0 +1,22 @@
+name: SSH Test
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  test-ssh:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: SSH 접속 테스트
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.RASP_HOST }}
+          username: ${{ secrets.RASP_USER }}
+          key: ${{ secrets.RASP_SSH_KEY }}
+          port: 22
+          script: |
+            echo "SSH 연결 성공!"
+            whoami
+            hostname
