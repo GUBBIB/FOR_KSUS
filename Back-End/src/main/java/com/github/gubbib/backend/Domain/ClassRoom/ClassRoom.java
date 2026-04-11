@@ -2,10 +2,14 @@ package com.github.gubbib.backend.Domain.ClassRoom;
 
 import com.github.gubbib.backend.Domain.BaseEntity;
 import com.github.gubbib.backend.Domain.Building.Building;
+import com.github.gubbib.backend.Domain.LectureTime.LectureTime;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -27,6 +31,9 @@ public class ClassRoom extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "building_id")
     private Building building;
+
+    @OneToMany(mappedBy = "classRoom")
+    private List<LectureTime> lectureTimes = new ArrayList<>();
 
     public static ClassRoom create(Building building, String roomNumber) {
         ClassRoom cr = new ClassRoom();

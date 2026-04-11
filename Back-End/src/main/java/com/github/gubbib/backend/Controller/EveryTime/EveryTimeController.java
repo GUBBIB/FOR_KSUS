@@ -1,5 +1,6 @@
 package com.github.gubbib.backend.Controller.EveryTime;
 
+import com.github.gubbib.backend.DTO.EveryTime.FetchRequestDTO;
 import com.github.gubbib.backend.Service.EveryTime.TimetableService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -21,9 +23,11 @@ public class EveryTimeController {
 
     @PostMapping("/fetch")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<String> fetch() throws Exception {
+    public ResponseEntity<String> fetch(
+            @RequestBody FetchRequestDTO request
+    ) throws Exception {
 
-        timetableService.fetchAndSaveClassrooms();
+        timetableService.fetchAndSaveClassrooms(request.cookie());
 
         return ResponseEntity.ok("강의실 데이터 수집 완료");
     }

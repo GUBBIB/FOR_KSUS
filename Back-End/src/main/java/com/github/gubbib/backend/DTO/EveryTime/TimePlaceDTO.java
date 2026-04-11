@@ -1,9 +1,11 @@
 package com.github.gubbib.backend.DTO.EveryTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
 import lombok.Getter;
 
 @Getter
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TimePlaceDTO {
 
     @JacksonXmlProperty(isAttribute = true)
