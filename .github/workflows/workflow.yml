@@ -1,37 +1,51 @@
-name: SSH Test (Cloudflare Tunnel)
+name: Deploy Spring Boot (Build on GitHub)
 
 on:
   push:
     branches: [ main ]
 
 jobs:
-  test-ssh:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: cloudflared 설치
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build with Gradle
+        run: |
+          chmod +x ./gradlew
+          ./gradlew build -x test
+
+      - name: Install cloudflared
         run: |
           wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O cloudflared
           chmod +x cloudflared
           sudo mv cloudflared /usr/local/bin/
 
-      - name: SSH 접속 테스트
+      - name: Deploy to Server
         run: |
           # 터널 연결
           cloudflared access ssh --hostname ${{ secrets.RASP_HOST }} --url ssh://localhost:2222 &
           sleep 5
 
-          # 🔥 private key 파일 생성
+          # SSH 키 추출
           echo "${{ secrets.RASP_SSH_KEY }}" > key.pem
           chmod 600 key.pem
 
-          # SSH 접속
+          # jar 전송
+          scp -o StrictHostKeyChecking=no -i key.pem -P 2222 build/libs/*.jar ${{ secrets.RASP_USER }}@localhost:/home/rasp/Project/FOR_KSUS/app.jar
+
+          # 서버 실행
           ssh -o StrictHostKeyChecking=no -i key.pem -p 2222 ${{ secrets.RASP_USER }}@localhost << 'EOF'
-            echo "===== SSH 연결 성공 ====="
-            whoami
-            hostname
-            echo "========================="
+            pkill -f 'java -jar' || true
+            nohup java -jar /home/rasp/Project/FOR_KSUS/app.jar > app.log 2>&1 &
           EOF
 
-          # 종료
-          pkill -f cloudflared || true  
+          pkill -f cloudflared || true
