@@ -20,6 +20,7 @@ jobs:
 
       - name: Build with Gradle
         run: |
+          cd Back-End
           chmod +x ./gradlew
           ./gradlew build -x test
 
