@@ -34,4 +34,4 @@ jobs:
           EOF
 
           # 종료
-          pkill -f cloudflared || true
+          pkill -f cloudflared || true  
