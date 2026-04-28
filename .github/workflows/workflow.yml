@@ -41,7 +41,7 @@ jobs:
           chmod 600 key.pem
 
           # jar 전송
-          scp -o StrictHostKeyChecking=no -i key.pem -P 2222 build/libs/*.jar ${{ secrets.RASP_USER }}@localhost:/home/rasp/Project/FOR_KSUS/app.jar
+          scp -o StrictHostKeyChecking=no -i key.pem -P 2222 Back-End/build/libs/*.jar ${{ secrets.RASP_USER }}@localhost:/home/rasp/Project/FOR_KSUS/app.jar
 
           # 서버 실행
           ssh -o StrictHostKeyChecking=no -i key.pem -p 2222 ${{ secrets.RASP_USER }}@localhost << 'EOF'
