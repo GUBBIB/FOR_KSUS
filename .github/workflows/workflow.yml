@@ -1,4 +1,4 @@
-name: SSH Test
+name: SSH Test (Cloudflare Tunnel)
 
 on:
   push:
@@ -9,14 +9,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: cloudflared 설치
+        run: |
+          wget https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64 -O cloudflared
+          chmod +x cloudflared
+          sudo mv cloudflared /usr/local/bin/
+
       - name: SSH 접속 테스트
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.RASP_HOST }}
-          username: ${{ secrets.RASP_USER }}
-          key: ${{ secrets.RASP_SSH_KEY }}
-          port: 22
-          script: |
-            echo "SSH 연결 성공!"
+        run: |
+          # 터널 연결 (백그라운드)
+          cloudflared access ssh --hostname ${{ secrets.HOST }} --url ssh://localhost:2222 &
+          sleep 5
+
+          # SSH 접속
+          ssh -o StrictHostKeyChecking=no -p 2222 ${{ secrets.USER }}@localhost << 'EOF'
+            echo "===== SSH 연결 성공 ====="
             whoami
             hostname
+            echo "========================="
+          EOF
+
+          # cloudflared 종료
+          pkill -f cloudflared || true
