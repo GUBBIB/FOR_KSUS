@@ -44,6 +44,11 @@ public enum ErrorCode {
     USER_PASSWORD_NOT_MATCH(HttpStatus.BAD_REQUEST, "U006", "비밀번호가 일치하지 않습니다."),
     USER_FORBIDDEN(HttpStatus.FORBIDDEN, "U007", "사용자 권한이 충분하지 않습니다."),
     USER_SAME_AS_OLD_PASSWORD(HttpStatus.CONFLICT, "U008", "이전 비밀번호와 동일합니다."),
+
+    //  건물-강의실 관련
+    BUILDING_NOT_FOUND(HttpStatus.NOT_FOUND, "BC001", "존재하지 않는 건물입니다."),
+    CLASSROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "B002", "존재하지 않는 강의실입니다."),
+
     ;
 
     private final HttpStatus httpStatus;
