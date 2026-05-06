@@ -1,0 +1,52 @@
+name: Deploy Front-End (Vite React)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Front-End/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Front-End/package-lock.json
+
+      - name: Install dependencies
+        working-directory: Front-End
+        run: npm install
+
+      - name: Build Vite project
+        working-directory: Front-End
+        run: npm run build
+
+      - name: Deploy to Server
+          run: |
+            # SSH 키 설정
+            echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
+            chmod 600 key.pem
+
+            # dist 전송 (Vite build 결과)
+            scp -o StrictHostKeyChecking=no -i key.pem \
+            -r Front-End/dist/* \
+            ${{ secrets.USER }}@${{ secrets.FRONT_HOST }}:/home/rasp/Project/FOR_KSUS/front/
+
+            # 서버 접속 후 작업 (필요하면)
+            ssh -o StrictHostKeyChecking=no -i key.pem \
+            ${{ secrets.USER }}@${{ secrets.FRONT_HOST }} << 'EOF'
+              echo "Front-End deployed"
+
+              # 필요하면 nginx reload 같은 것도 여기서 가능
+              # sudo systemctl reload nginx
+            EOF
+
+            rm -f key.pem

@@ -1,0 +1,47 @@
+name: Deploy Spring Boot (Build on GitHub)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Back-End/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Build with Gradle
+        run: |
+          cd Back-End
+          chmod +x ./gradlew
+          ./gradlew build -x test
+
+      - name: Deploy to Server
+        run: |
+          # SSH 키 설정
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
+          chmod 600 key.pem
+
+          # jar 전송
+          scp -o StrictHostKeyChecking=no -i key.pem \
+          Back-End/build/libs/*.jar \
+          ${{ secrets.USER }}@${{ secrets.BACK_HOST }}:/home/rasp/Project/FOR_KSUS/app.jar
+
+          # 서버 실행
+          ssh -o StrictHostKeyChecking=no -i key.pem \
+          ${{ secrets.USER }}@${{ secrets.BACK_HOST }} << 'EOF'
+            pkill -f 'java -jar' || true
+            nohup java -jar /home/rasp/Project/FOR_KSUS/app.jar > app.log 2>&1 &
+          EOF
+
+          rm -f key.pem
