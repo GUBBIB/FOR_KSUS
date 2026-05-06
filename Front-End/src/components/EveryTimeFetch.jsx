@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { fetchTimetable } from '../api/everytime'
 
-export default function EverytimeFetch() {
+export default function EveryTimeFetch() {
   const [cookie, setCookie] = useState('')
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState('')
