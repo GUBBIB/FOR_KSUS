@@ -29,24 +29,18 @@ jobs:
         working-directory: Front-End
         run: npm run build
 
-      - name: Deploy to Server
-          run: |
-            # SSH 키 설정
-            echo "${{ secrets.SSH_PRIVATE_KEY }}" > key.pem
-            chmod 600 key.pem
+      - name: Deploy Front-End
+        run: |
+          eval "$(ssh-agent -s)"
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add -
 
-            # dist 전송 (Vite build 결과)
-            scp -o StrictHostKeyChecking=no -i key.pem \
-            -r Front-End/dist/* \
-            ${{ secrets.USER }}@${{ secrets.FRONT_HOST }}:/home/rasp/Project/FOR_KSUS/front/
+          rsync -avz --delete \
+            -e "ssh -o StrictHostKeyChecking=no" \
+            Front-End/dist/ \
+            ${{ secrets.USER }}@${{ secrets.FRONT_HOST }}:/home/front/
 
-            # 서버 접속 후 작업 (필요하면)
-            ssh -o StrictHostKeyChecking=no -i key.pem \
+          ssh -o StrictHostKeyChecking=no \
             ${{ secrets.USER }}@${{ secrets.FRONT_HOST }} << 'EOF'
               echo "Front-End deployed"
-
-              # 필요하면 nginx reload 같은 것도 여기서 가능
-              # sudo systemctl reload nginx
-            EOF
-
-            rm -f key.pem
+              sudo systemctl restart nginx
+          EOF
