@@ -35,13 +35,13 @@ jobs:
 
           scp -o StrictHostKeyChecking=no \
             Back-End/build/libs/*.jar \
-            ${{ secrets.USER }}@${{ secrets.BACK_HOST }}:/ubuntu/back/app.jar
+            ${{ secrets.USER }}@${{ secrets.BACK_HOST }}:/home/ubuntu/back/app.jar
 
           ssh -o StrictHostKeyChecking=no \
             ${{ secrets.USER }}@${{ secrets.BACK_HOST }} << 'EOF'
               pkill -f 'app.jar' || true
 
-              nohup java -jar /ubuntu/back/app.jar > /ubuntu/back/app.log 2>&1 &
+              nohup java -jar /home/ubuntu/back/app.jar > /home/ubuntu/back/app.log 2>&1 &
 
               echo "Spring Boot deployed"
           EOF
