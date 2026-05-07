@@ -73,7 +73,12 @@ public class SecurityConfig {
                                 "/actuator/**",
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
+<<<<<<< HEAD
                                 "/swagger-ui.html"
+=======
+                                "/swagger-ui.html",
+                                "/api/v1/everytime/**"
+>>>>>>> 88b5bad72e1c0f388318a65c9fba0e3372bff26f
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

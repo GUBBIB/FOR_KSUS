@@ -113,7 +113,11 @@ public class AuthServiceImp implements AuthService {
     @Override
     @Transactional
     public void sendVerificationMail(StudentVerifyRequestDTO dto) {
+<<<<<<< HEAD
         if(!dto.email().matches("^[A-Za-z0-9._%+-]+@cs\\.ks\\.ac\\.kr$")){
+=======
+        if(!dto.email().matches("^[A-Za-z0-9._%+-]+@ks\\.ac\\.kr$")){
+>>>>>>> 88b5bad72e1c0f388318a65c9fba0e3372bff26f
             throw new GlobalException(ErrorCode.AUTH_VERIFICATION_EMAIL_INVALID);
         }
 

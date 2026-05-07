@@ -1,5 +1,6 @@
 package com.github.gubbib.backend.Service.EveryTime;
 
+<<<<<<< HEAD
 import com.fasterxml.jackson.dataformat.xml.XmlMapper;
 import com.github.gubbib.backend.DTO.EveryTime.*;
 import com.github.gubbib.backend.Domain.Building.Building;
@@ -14,10 +15,23 @@ import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
+=======
+import com.github.gubbib.backend.DTO.EveryTime.ResponseDTO;
+import com.github.gubbib.backend.DTO.EveryTime.SubjectDTO;
+import com.github.gubbib.backend.DTO.EveryTime.TimePlaceDTO;
+import com.github.gubbib.backend.Service.EveryTime.EverytimeClient;
+import com.github.gubbib.backend.Service.EveryTime.TimetableParser;
+import com.github.gubbib.backend.Service.EveryTime.TimetableSaver;
+import com.github.gubbib.backend.Service.EveryTime.TimetableService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
+>>>>>>> 88b5bad72e1c0f388318a65c9fba0e3372bff26f
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+<<<<<<< HEAD
 @Transactional(readOnly = true)
 public class TimetableService {
 
@@ -29,12 +43,23 @@ public class TimetableService {
 
     @Transactional
     public void fetchAndSaveClassrooms(String cookie) throws Exception {
+=======
+public class TimetableServiceImp implements TimetableService {
+
+    private final EverytimeClient everytimeClient;
+    private final TimetableParser timetableParser;
+    private final TimetableSaver timetableSaver;
+
+    @Override
+    public void fetchAndSaveTimetable(String cookie) throws Exception {
+>>>>>>> 88b5bad72e1c0f388318a65c9fba0e3372bff26f
 
         int startNum = 0;
         int limitNum = 50;
 
         while (true) {
 
+<<<<<<< HEAD
             String xml = webClient.post()
                     .uri("/find/timetable/subject/list")
                     .header("User-Agent", "Mozilla/5.0")
@@ -51,21 +76,34 @@ public class TimetableService {
                     .block();
 
             ResponseDTO response = xmlMapper.readValue(xml, ResponseDTO.class);
+=======
+            String xml = everytimeClient.fetchTimetable(cookie, startNum, limitNum);
+
+            ResponseDTO response = timetableParser.parse(xml);
+>>>>>>> 88b5bad72e1c0f388318a65c9fba0e3372bff26f
             List<SubjectDTO> subjects = response.getSubjects();
 
             if (subjects == null || subjects.isEmpty()) break;
 
             for (SubjectDTO subject : subjects) {
+<<<<<<< HEAD
 
                 if (subject.getTimeplaces() == null) continue;
 
                 for (TimePlaceDTO tp : subject.getTimeplaces()) {
 
                     parseAndSavePlace(tp.getPlace());
+=======
+                if (subject.getTimeplaces() == null) continue;
+
+                for (TimePlaceDTO tp : subject.getTimeplaces()) {
+                    timetableSaver.save(tp);
+>>>>>>> 88b5bad72e1c0f388318a65c9fba0e3372bff26f
                 }
             }
 
             startNum += limitNum;
+<<<<<<< HEAD
             System.out.println("현재 startNum: " + startNum);
 
             Thread.sleep(200);
@@ -138,4 +176,9 @@ public class TimetableService {
                     return classRoomRepository.save(c);
                 });
     }
+=======
+            Thread.sleep(200);
+        }
+    }
+>>>>>>> 88b5bad72e1c0f388318a65c9fba0e3372bff26f
 }
