@@ -38,10 +38,11 @@ jobs:
             ${{ secrets.USER }}@${{ secrets.BACK_HOST }}:/home/ubuntu/back/app.jar
 
           ssh -o StrictHostKeyChecking=no \
-            ${{ secrets.USER }}@${{ secrets.BACK_HOST }} << 'EOF'
-              pkill -f 'app.jar' || true
-
-              nohup java -jar /home/ubuntu/back/app.jar > /home/ubuntu/back/app.log 2>&1 &
+            ${{ secrets.USER }}@${{ secrets.BACK_HOST }} << 'EOF'            
+              sudo systemctl stop springboot || true
+            
+              sudo systemctl daemon-reload
+              sudo systemctl start springboot
 
               echo "Spring Boot deployed"
           EOF
