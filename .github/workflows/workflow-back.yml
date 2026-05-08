@@ -39,10 +39,10 @@ jobs:
 
           ssh -o StrictHostKeyChecking=no \
             ${{ secrets.USER }}@${{ secrets.BACK_HOST }} << 'EOF'            
-              sudo systemctl stop springboot || true
+              sudo systemctl stop spring || true
             
               sudo systemctl daemon-reload
-              sudo systemctl start springboot
+              sudo systemctl start spring
 
               echo "Spring Boot deployed"
           EOF
