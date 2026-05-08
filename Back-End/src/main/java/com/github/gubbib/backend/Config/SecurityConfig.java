@@ -106,10 +106,10 @@ public class SecurityConfig {
                 "https://forksus.duckdns.org"
         ));
         cors.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "DELETE"
+                "*"
         ));
         cors.setAllowedHeaders(List.of(
-                "Authorization", "Bearer"
+                "*"
         ));
         cors.setAllowCredentials(true);
 
