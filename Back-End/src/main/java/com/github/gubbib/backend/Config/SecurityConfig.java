@@ -102,13 +102,14 @@ public class SecurityConfig {
         CorsConfiguration cors = new CorsConfiguration();
         cors.setAllowedOrigins(List.of(
                 "http://localhost:3000",
-                "http://localhost:5173"
+                "http://localhost:5173",
+                "https://forksus.duckdns.org"
         ));
         cors.setAllowedMethods(List.of(
-                "GET", "POST", "PUT", "DELETE"
+                "*"
         ));
         cors.setAllowedHeaders(List.of(
-                "Authorization", "Bearer"
+                "*"
         ));
         cors.setAllowCredentials(true);
 

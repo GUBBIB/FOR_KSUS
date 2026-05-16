@@ -6,9 +6,9 @@
 
 <p align="center">
 <img src="https://img.shields.io/badge/React-Frontend-blue?logo=react"/>
-<img src="https://img.shields.io/badge/Laravel-Backend-red?logo=laravel"/>
+<img src="https://img.shields.io/badge/SpringBoot-Backend-brightgreen?logo=springboot"/>
 <img src="https://img.shields.io/badge/MySQL-Database-orange?logo=mysql"/>
-<img src="https://img.shields.io/badge/Apache-Server-green?logo=apache"/>
+<img src="https://img.shields.io/badge/Nginx-Server-blue?logo=nginx"/>
 </p>
 
 ---

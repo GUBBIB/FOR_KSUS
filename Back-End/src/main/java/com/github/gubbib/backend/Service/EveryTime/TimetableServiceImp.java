@@ -39,7 +39,7 @@ public class TimetableServiceImp implements TimetableService {
                 if (subject.getTimeplaces() == null) continue;
 
                 for (TimePlaceDTO tp : subject.getTimeplaces()) {
-                    timetableSaver.save(tp);
+                    timetableSaver.save(subject, tp);
                 }
             }
 

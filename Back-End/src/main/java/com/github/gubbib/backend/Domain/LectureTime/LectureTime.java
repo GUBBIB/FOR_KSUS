@@ -2,6 +2,7 @@ package com.github.gubbib.backend.Domain.LectureTime;
 
 import com.github.gubbib.backend.Domain.BaseEntity;
 import com.github.gubbib.backend.Domain.ClassRoom.ClassRoom;
+import com.github.gubbib.backend.Domain.Lecture.Lecture;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;
@@ -25,12 +26,19 @@ public class LectureTime extends BaseEntity {
     @JoinColumn(name = "classroom_id")
     private ClassRoom classRoom;
 
-    public static LectureTime create(ClassRoom classRoom, int day, int start, int end) {
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "lecture_id")
+    private Lecture lecture;
+
+    public static LectureTime create(Lecture lecture, ClassRoom classRoom, int day, int start, int end) {
         LectureTime lt = new LectureTime();
+
+        lt.lecture = lecture;
         lt.classRoom = classRoom;
         lt.day = day;
         lt.start = start;
         lt.end = end;
+
         return lt;
     }
 }
