@@ -18,3 +18,16 @@ export const getBuildings = async () => {
   
     return res.json()
   }
+
+
+  export const getTimetable = async (buildingId, classroomId) => {
+    const res = await fetch(
+      `/api/v1/everytime/buildings/${buildingId}/classrooms/${classroomId}/timetable`
+    )
+
+    if (!res.ok) {
+      throw new Error('시간표 조회 실패')
+    }
+
+    return res.json()
+  }
