@@ -1,6 +1,9 @@
 package com.github.gubbib.backend.Service.Building;
 
 import com.github.gubbib.backend.DTO.Building.BuildingResponseDTO;
+import com.github.gubbib.backend.Domain.Building.Building;
+import com.github.gubbib.backend.Exception.ErrorCode;
+import com.github.gubbib.backend.Exception.GlobalException;
 import com.github.gubbib.backend.Repository.Building.BuildingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,5 +31,11 @@ public class BuildingServiceImp implements BuildingService{
                         (String) row[2]
                 ))
                 .toList();
+    }
+
+    @Override
+    public Building existsBuilding(Long buildingId) {
+        return buildingRepository.findById(buildingId)
+                .orElseThrow(() -> new GlobalException(ErrorCode.BUILDING_NOT_FOUND));
     }
 }
