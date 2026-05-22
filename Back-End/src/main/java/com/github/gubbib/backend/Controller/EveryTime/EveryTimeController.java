@@ -2,6 +2,7 @@ package com.github.gubbib.backend.Controller.EveryTime;
 
 import com.github.gubbib.backend.DTO.Building.BuildingResponseDTO;
 import com.github.gubbib.backend.DTO.ClassRoom.ClassRoomResponseDTO;
+import com.github.gubbib.backend.DTO.ClassRoom.ClassRoomTimetableResponseDTO;
 import com.github.gubbib.backend.DTO.Error.ErrorResponseDTO;
 import com.github.gubbib.backend.DTO.EveryTime.FetchRequestDTO;
 import com.github.gubbib.backend.Service.Building.BuildingService;
@@ -9,6 +10,7 @@ import com.github.gubbib.backend.Service.Building.BuildingServiceImp;
 import com.github.gubbib.backend.Service.ClassRoom.ClassRoomService;
 import com.github.gubbib.backend.Service.EveryTime.TimetableService;
 import com.github.gubbib.backend.Service.EveryTime.TimetableServiceImp;
+import com.github.gubbib.backend.Service.LectureTime.LectureTimeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,6 +35,7 @@ public class EveryTimeController {
     private final TimetableService timetableService;
     private final BuildingService buildingService;
     private final ClassRoomService classRoomService;
+    private final LectureTimeService lectureTimeService;
 
     @PostMapping("/fetch")
     @PreAuthorize("hasRole('ADMIN')")
@@ -92,5 +95,13 @@ public class EveryTimeController {
             @PathVariable Long buildingID
     ){
         return classRoomService.getClassRoomsByBuilding(buildingID);
+    }
+
+    @GetMapping("/buildings/{buildingID}/classrooms/{classroomID}/timetable")
+    public List<ClassRoomTimetableResponseDTO> getClassRoomTimetable(
+            @PathVariable Long buildingID,
+            @PathVariable Long classroomID
+    ){
+        return lectureTimeService.getClassRoomTimetable(buildingID, classroomID);
     }
 }
