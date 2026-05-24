@@ -49,6 +49,10 @@ public enum ErrorCode {
     BUILDING_NOT_FOUND(HttpStatus.NOT_FOUND, "BC001", "존재하지 않는 건물입니다."),
     CLASSROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "B002", "존재하지 않는 강의실입니다."),
 
+    // 게시판 관련
+    BOARD_NAME_DUPLICATION(HttpStatus.CONFLICT, "B001", "이미 존재하는 게시판 이름입니다."),
+    BOARD_NOT_FOUND(HttpStatus.NOT_FOUND, "B002", "존재하지 않는 게시판입니다."),
+
     ;
 
     private final HttpStatus httpStatus;
