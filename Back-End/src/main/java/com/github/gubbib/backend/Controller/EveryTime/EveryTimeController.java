@@ -97,6 +97,28 @@ public class EveryTimeController {
         return classRoomService.getClassRoomsByBuilding(buildingID);
     }
 
+    @Operation(
+            summary = "강의실 시간표 조회",
+            description = "특정 건물의 특정 강의실 시간표를 조회한다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "강의실 시간표 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            array = @ArraySchema(schema = @Schema(implementation = ClassRoomTimetableResponseDTO.class))
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "존재하지 않는 건물",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
     @GetMapping("/buildings/{buildingID}/classrooms/{classroomID}/timetable")
     public List<ClassRoomTimetableResponseDTO> getClassRoomTimetable(
             @PathVariable Long buildingID,
