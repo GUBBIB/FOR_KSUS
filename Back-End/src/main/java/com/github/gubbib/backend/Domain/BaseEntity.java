@@ -26,6 +26,6 @@ public abstract class BaseEntity {
     private boolean isDeleted = false;
 
     public void changeIsDeleted(boolean isDeleted) {
-        this.isDeleted = isDeleted;
-    }
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();    }
 }
