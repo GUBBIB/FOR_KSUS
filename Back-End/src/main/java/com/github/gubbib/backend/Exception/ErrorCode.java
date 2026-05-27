@@ -53,6 +53,12 @@ public enum ErrorCode {
     BOARD_NAME_DUPLICATION(HttpStatus.CONFLICT, "B001", "이미 존재하는 게시판 이름입니다."),
     BOARD_NOT_FOUND(HttpStatus.NOT_FOUND, "B002", "존재하지 않는 게시판입니다."),
 
+    // 게시글 관련
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "P002", "존재하지 않는 게시글입니다."),
+    POST_NO_CHANGES(HttpStatus.BAD_REQUEST, "P003", "변경된 내용이 없습니다."),
+    POST_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "P004", "게시글 수정 권한이 없습니다."),
+    POST_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "P005", "게시글 삭제 권한이 없습니다."),
+
     ;
 
     private final HttpStatus httpStatus;
