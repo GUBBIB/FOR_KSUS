@@ -3,6 +3,7 @@ package com.github.gubbib.backend.Controller.Post;
 
 import com.github.gubbib.backend.DTO.Post.PostCreateRequestDTO;
 import com.github.gubbib.backend.DTO.Post.PostResponseDTO;
+import com.github.gubbib.backend.DTO.Post.PostUpdateRequestDTO;
 import com.github.gubbib.backend.Principal.CustomUserPrincipal;
 import com.github.gubbib.backend.Service.Post.PostService;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -48,5 +49,39 @@ public class PostController {
         return ResponseEntity.ok(
                 postService.getAllPosts(boardId)
         );
+    }
+
+    @GetMapping("/{postId}")
+    public ResponseEntity<PostResponseDTO> getPost(
+            @PathVariable Long boardId,
+            @PathVariable Long postId
+    ){
+        return ResponseEntity.ok(
+                postService.getPost(boardId, postId)
+        );
+    }
+
+    @PutMapping("/{postId}")
+    public ResponseEntity<PostResponseDTO> updatePost(
+            @PathVariable Long boardId,
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal,
+            @Valid @RequestBody PostUpdateRequestDTO request
+    ){
+        return ResponseEntity.ok(
+                postService.updatePost(boardId, postId, request, userPrincipal)
+        );
+    }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<Void> deletePost(
+            @PathVariable Long boardId,
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal
+    ){
+
+        postService.deletePost(boardId, postId, userPrincipal);
+
+        return ResponseEntity.noContent().build();
     }
 }
