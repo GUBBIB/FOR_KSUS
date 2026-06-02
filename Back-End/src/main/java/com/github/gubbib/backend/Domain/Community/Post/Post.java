@@ -1,7 +1,7 @@
-package com.github.gubbib.backend.Domain.Post;
+package com.github.gubbib.backend.Domain.Community.Post;
 
 import com.github.gubbib.backend.Domain.BaseEntity;
-import com.github.gubbib.backend.Domain.Board.Board;
+import com.github.gubbib.backend.Domain.Community.Board.Board;
 import com.github.gubbib.backend.Domain.User.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import java.util.*;
 
-import com.github.gubbib.backend.Domain.Comment.Comment;
+import com.github.gubbib.backend.Domain.Community.Comment.Comment;
 
 @Entity
 @NoArgsConstructor(access = AccessLevel.PROTECTED)

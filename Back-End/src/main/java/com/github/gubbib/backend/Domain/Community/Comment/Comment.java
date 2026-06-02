@@ -1,7 +1,7 @@
-package com.github.gubbib.backend.Domain.Comment;
+package com.github.gubbib.backend.Domain.Community.Comment;
 
 import com.github.gubbib.backend.Domain.BaseEntity;
-import com.github.gubbib.backend.Domain.Post.Post;
+import com.github.gubbib.backend.Domain.Community.Post.Post;
 import com.github.gubbib.backend.Domain.User.User;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
