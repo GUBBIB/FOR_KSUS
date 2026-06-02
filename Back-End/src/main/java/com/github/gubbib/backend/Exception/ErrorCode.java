@@ -54,10 +54,16 @@ public enum ErrorCode {
     BOARD_NOT_FOUND(HttpStatus.NOT_FOUND, "B002", "존재하지 않는 게시판입니다."),
 
     // 게시글 관련
-    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "P002", "존재하지 않는 게시글입니다."),
-    POST_NO_CHANGES(HttpStatus.BAD_REQUEST, "P003", "변경된 내용이 없습니다."),
-    POST_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "P004", "게시글 수정 권한이 없습니다."),
-    POST_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "P005", "게시글 삭제 권한이 없습니다."),
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "존재하지 않는 게시글입니다."),
+    POST_NO_CHANGES(HttpStatus.BAD_REQUEST, "P002", "변경된 내용이 없습니다."),
+    POST_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "P003", "게시글 수정 권한이 없습니다."),
+    POST_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "P004", "게시글 삭제 권한이 없습니다."),
+
+    // 댓글 관련
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "CM001", "존재하지 않는 댓글입니다."),
+    COMMENT_NO_CHANGES(HttpStatus.BAD_REQUEST, "CM002", "변경된 내용이 없습니다."),
+    COMMENT_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "CM003", "댓글 수정 권한이 없습니다."),
+    COMMENT_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "CM004", "댓글 삭제 권한이 없습니다."),
 
     ;
 
