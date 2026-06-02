@@ -3,7 +3,7 @@ package com.github.gubbib.backend.Service.Post;
 import com.github.gubbib.backend.DTO.Post.PostCreateRequestDTO;
 import com.github.gubbib.backend.DTO.Post.PostResponseDTO;
 import com.github.gubbib.backend.DTO.Post.PostUpdateRequestDTO;
-import com.github.gubbib.backend.Domain.Post.Post;
+import com.github.gubbib.backend.Domain.Community.Post.Post;
 import com.github.gubbib.backend.Principal.CustomUserPrincipal;
 
 import java.util.List;

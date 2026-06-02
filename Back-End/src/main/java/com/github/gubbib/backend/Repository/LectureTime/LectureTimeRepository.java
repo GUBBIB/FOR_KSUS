@@ -1,7 +1,7 @@
 package com.github.gubbib.backend.Repository.LectureTime;
 
-import com.github.gubbib.backend.Domain.ClassRoom.ClassRoom;
-import com.github.gubbib.backend.Domain.LectureTime.LectureTime;
+import com.github.gubbib.backend.Domain.TimeTable.ClassRoom.ClassRoom;
+import com.github.gubbib.backend.Domain.TimeTable.LectureTime.LectureTime;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

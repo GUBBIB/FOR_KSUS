@@ -1,6 +1,6 @@
 package com.github.gubbib.backend.Repository.Post;
 
-import com.github.gubbib.backend.Domain.Post.Post;
+import com.github.gubbib.backend.Domain.Community.Post.Post;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

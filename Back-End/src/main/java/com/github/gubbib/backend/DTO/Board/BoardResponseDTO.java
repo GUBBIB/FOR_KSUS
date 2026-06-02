@@ -1,6 +1,6 @@
 package com.github.gubbib.backend.DTO.Board;
 
-import com.github.gubbib.backend.Domain.Board.Board;
+import com.github.gubbib.backend.Domain.Community.Board.Board;
 import lombok.Builder;
 
 @Builder

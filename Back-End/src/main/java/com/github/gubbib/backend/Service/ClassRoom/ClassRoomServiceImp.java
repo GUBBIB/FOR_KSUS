@@ -1,8 +1,8 @@
 package com.github.gubbib.backend.Service.ClassRoom;
 
 import com.github.gubbib.backend.DTO.ClassRoom.ClassRoomResponseDTO;
-import com.github.gubbib.backend.Domain.Building.Building;
-import com.github.gubbib.backend.Domain.ClassRoom.ClassRoom;
+import com.github.gubbib.backend.Domain.TimeTable.Building.Building;
+import com.github.gubbib.backend.Domain.TimeTable.ClassRoom.ClassRoom;
 import com.github.gubbib.backend.Exception.ErrorCode;
 import com.github.gubbib.backend.Exception.GlobalException;
 import com.github.gubbib.backend.Repository.Building.BuildingRepository;

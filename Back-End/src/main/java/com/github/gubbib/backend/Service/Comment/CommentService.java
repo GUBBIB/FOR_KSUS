@@ -3,10 +3,8 @@ package com.github.gubbib.backend.Service.Comment;
 import com.github.gubbib.backend.DTO.Comment.CommentCreateRequestDTO;
 import com.github.gubbib.backend.DTO.Comment.CommentResponseDTO;
 import com.github.gubbib.backend.DTO.Comment.CommentUpdateRequestDTO;
-import com.github.gubbib.backend.Domain.Comment.Comment;
+import com.github.gubbib.backend.Domain.Community.Comment.Comment;
 import com.github.gubbib.backend.Principal.CustomUserPrincipal;
-import jakarta.validation.Valid;
-import org.jspecify.annotations.Nullable;
 
 import java.util.List;
 

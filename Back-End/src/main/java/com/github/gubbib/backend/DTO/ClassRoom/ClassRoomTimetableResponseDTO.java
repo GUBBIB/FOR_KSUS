@@ -1,6 +1,6 @@
 package com.github.gubbib.backend.DTO.ClassRoom;
 
-import com.github.gubbib.backend.Domain.LectureTime.LectureTime;
+import com.github.gubbib.backend.Domain.TimeTable.LectureTime.LectureTime;
 
 public record ClassRoomTimetableResponseDTO(
         String lectureName,

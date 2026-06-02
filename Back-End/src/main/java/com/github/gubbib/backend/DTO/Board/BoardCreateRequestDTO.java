@@ -7,7 +7,7 @@ public record BoardCreateRequestDTO(
 
         @NotBlank
         @Size(max = 255)
-        String name,
+        String title,
 
         @Size(max = 255)
         String description

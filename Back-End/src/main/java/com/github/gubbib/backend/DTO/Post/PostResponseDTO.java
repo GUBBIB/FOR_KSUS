@@ -1,6 +1,6 @@
 package com.github.gubbib.backend.DTO.Post;
 
-import com.github.gubbib.backend.Domain.Post.Post;
+import com.github.gubbib.backend.Domain.Community.Post.Post;
 
 import java.time.LocalDateTime;
 

@@ -2,7 +2,7 @@ package com.github.gubbib.backend.Service.Board;
 
 import com.github.gubbib.backend.DTO.Board.BoardCreateRequestDTO;
 import com.github.gubbib.backend.DTO.Board.BoardResponseDTO;
-import com.github.gubbib.backend.Domain.Board.Board;
+import com.github.gubbib.backend.Domain.Community.Board.Board;
 
 import java.util.List;
 

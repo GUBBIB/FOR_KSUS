@@ -2,7 +2,7 @@ package com.github.gubbib.backend.Service.Board;
 
 import com.github.gubbib.backend.DTO.Board.BoardCreateRequestDTO;
 import com.github.gubbib.backend.DTO.Board.BoardResponseDTO;
-import com.github.gubbib.backend.Domain.Board.Board;
+import com.github.gubbib.backend.Domain.Community.Board.Board;
 import com.github.gubbib.backend.Exception.ErrorCode;
 import com.github.gubbib.backend.Exception.GlobalException;
 import com.github.gubbib.backend.Repository.Board.BoardRepository;
@@ -39,12 +39,12 @@ public class BoardServiceImp implements BoardService {
     @Transactional
     public BoardResponseDTO createBoard(BoardCreateRequestDTO request) {
 
-        if (boardRepository.existsByName(request.name())) {
+        if (boardRepository.existsByTitle(request.title())) {
             throw new GlobalException(ErrorCode.BOARD_NAME_DUPLICATION);
         }
 
         Board board = new Board(
-                request.name(),
+                request.title(),
                 request.description()
         );
 

@@ -1,6 +1,6 @@
 package com.github.gubbib.backend.DTO.Comment;
 
-import com.github.gubbib.backend.Domain.Comment.Comment;
+import com.github.gubbib.backend.Domain.Community.Comment.Comment;
 
 import java.time.LocalDateTime;
 

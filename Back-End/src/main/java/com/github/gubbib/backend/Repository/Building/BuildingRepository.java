@@ -1,7 +1,6 @@
 package com.github.gubbib.backend.Repository.Building;
 
-import com.github.gubbib.backend.DTO.Building.BuildingResponseDTO;
-import com.github.gubbib.backend.Domain.Building.Building;
+import com.github.gubbib.backend.Domain.TimeTable.Building.Building;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
