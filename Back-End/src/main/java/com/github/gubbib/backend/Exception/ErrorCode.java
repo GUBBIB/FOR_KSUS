@@ -65,6 +65,9 @@ public enum ErrorCode {
     COMMENT_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "CM003", "댓글 수정 권한이 없습니다."),
     COMMENT_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "CM004", "댓글 삭제 권한이 없습니다."),
 
+    // 버스 시간표 관련
+    BUS_SERVICE_ENDED(HttpStatus.NOT_FOUND, "BS001", "오늘 운행이 종료되었습니다.")
+
     ;
 
     private final HttpStatus httpStatus;
