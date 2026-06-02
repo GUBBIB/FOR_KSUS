@@ -5,11 +5,13 @@ import com.github.gubbib.backend.DTO.Post.PostResponseDTO;
 import com.github.gubbib.backend.DTO.Post.PostUpdateRequestDTO;
 import com.github.gubbib.backend.Domain.Board.Board;
 import com.github.gubbib.backend.Domain.Post.Post;
+import com.github.gubbib.backend.Domain.User.User;
 import com.github.gubbib.backend.Exception.ErrorCode;
 import com.github.gubbib.backend.Exception.GlobalException;
 import com.github.gubbib.backend.Principal.CustomUserPrincipal;
 import com.github.gubbib.backend.Repository.Post.PostRepository;
 import com.github.gubbib.backend.Service.Board.BoardService;
+import com.github.gubbib.backend.Service.User.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -25,6 +27,7 @@ public class PostServiceImp implements PostService{
 
     private final BoardService boardService;
     private final PostRepository postRepository;
+    private final UserService userService;
 
     @Override
     public Post existsPost(Long boardId, Long postId) {
@@ -36,11 +39,12 @@ public class PostServiceImp implements PostService{
     @Transactional
     public PostResponseDTO createPost(Long boardId, PostCreateRequestDTO request, CustomUserPrincipal userPrincipal) {
         Board b = boardService.existsBoard(boardId);
+        User u = userService.checkUser(userPrincipal);
 
         Post post = new Post(
                 request.title(),
                 request.content(),
-                userPrincipal.getUser(),
+                u,
                 b
         );
 
