@@ -36,7 +36,7 @@ public class CommentServiceImp implements CommentService {
 
     @Override
     public List<CommentResponseDTO> getAllComments(Long boardId, Long postId) {
-        Post p = postService.existsPost(postId, boardId);
+        Post p = postService.existsPost(boardId, postId);
 
         return commentRepository.findByPostIdAndIsDeletedFalseOrderByCreatedAtAsc(p.getId())
                 .stream()
@@ -48,7 +48,7 @@ public class CommentServiceImp implements CommentService {
     @Transactional
     public CommentResponseDTO createComment(Long boardId, Long postId, CommentCreateRequestDTO request, CustomUserPrincipal userPrincipal) {
 
-        Post p = postService.existsPost(postId, boardId);
+        Post p = postService.existsPost(boardId, postId);
         User u = userService.checkUser(userPrincipal);
 
         Comment comment = new Comment(
@@ -65,7 +65,7 @@ public class CommentServiceImp implements CommentService {
     @Override
     @Transactional
     public CommentResponseDTO updateComment(Long boardId, Long postId, Long commentId, CommentUpdateRequestDTO request, CustomUserPrincipal userPrincipal) {
-        Post p = postService.existsPost(postId, boardId);
+        Post p = postService.existsPost(boardId, postId);
         Comment c = existsComment(postId, commentId);
         User u = userService.checkUser(userPrincipal);
 
@@ -85,7 +85,7 @@ public class CommentServiceImp implements CommentService {
     @Override
     @Transactional
     public void deleteComment(Long boardId, Long postId, Long commentId, CustomUserPrincipal userPrincipal) {
-        Post p = postService.existsPost(postId, boardId);
+        Post p = postService.existsPost(boardId, postId);
         Comment c = existsComment(postId, commentId);
         User u = userService.checkUser(userPrincipal);
 

@@ -82,7 +82,7 @@ public class PostServiceImp implements PostService{
     public PostResponseDTO updatePost(Long boardId, Long postId, PostUpdateRequestDTO request, CustomUserPrincipal userPrincipal) {
 
         Board b = boardService.existsBoard(boardId);
-        Post p = existsPost(postId, b.getId());
+        Post p = existsPost(boardId, postId);
 
         if(!p.getUser().getId().equals(userPrincipal.getUser().getId())){
             throw new GlobalException(ErrorCode.POST_UPDATE_FORBIDDEN);
@@ -101,7 +101,7 @@ public class PostServiceImp implements PostService{
     @Transactional
     public void deletePost(Long boardId, Long postId, CustomUserPrincipal userPrincipal) {
         Board b = boardService.existsBoard(boardId);
-        Post p = existsPost(postId, b.getId());
+        Post p = existsPost(boardId, postId);
 
         if(!p.getUser().getId().equals(userPrincipal.getUser().getId())){
             throw new GlobalException(ErrorCode.POST_DELETE_FORBIDDEN);
