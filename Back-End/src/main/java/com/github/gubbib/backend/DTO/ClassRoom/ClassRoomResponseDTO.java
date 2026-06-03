@@ -1,6 +1,6 @@
 package com.github.gubbib.backend.DTO.ClassRoom;
 
-import com.github.gubbib.backend.Domain.ClassRoom.ClassRoom;
+import com.github.gubbib.backend.Domain.TimeTable.ClassRoom.ClassRoom;
 
 public record ClassRoomResponseDTO(
         Long id,

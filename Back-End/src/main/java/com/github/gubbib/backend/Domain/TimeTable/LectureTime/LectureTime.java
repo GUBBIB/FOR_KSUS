@@ -1,8 +1,8 @@
-package com.github.gubbib.backend.Domain.LectureTime;
+package com.github.gubbib.backend.Domain.TimeTable.LectureTime;
 
 import com.github.gubbib.backend.Domain.BaseEntity;
-import com.github.gubbib.backend.Domain.ClassRoom.ClassRoom;
-import com.github.gubbib.backend.Domain.Lecture.Lecture;
+import com.github.gubbib.backend.Domain.TimeTable.ClassRoom.ClassRoom;
+import com.github.gubbib.backend.Domain.TimeTable.Lecture.Lecture;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Getter;

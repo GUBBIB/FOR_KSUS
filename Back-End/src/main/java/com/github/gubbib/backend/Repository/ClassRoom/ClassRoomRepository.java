@@ -1,7 +1,7 @@
 package com.github.gubbib.backend.Repository.ClassRoom;
 
-import com.github.gubbib.backend.Domain.Building.Building;
-import com.github.gubbib.backend.Domain.ClassRoom.ClassRoom;
+import com.github.gubbib.backend.Domain.TimeTable.Building.Building;
+import com.github.gubbib.backend.Domain.TimeTable.ClassRoom.ClassRoom;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

@@ -1,0 +1,9 @@
+package com.github.gubbib.backend.Repository.Board;
+
+import com.github.gubbib.backend.Domain.Community.Board.Board;
+import org.springframework.data.jpa.repository.JpaRepository;
+
+public interface BoardRepository extends JpaRepository<Board, Long> {
+
+    boolean existsByTitle(String title);
+}

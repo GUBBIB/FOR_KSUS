@@ -49,6 +49,25 @@ public enum ErrorCode {
     BUILDING_NOT_FOUND(HttpStatus.NOT_FOUND, "BC001", "존재하지 않는 건물입니다."),
     CLASSROOM_NOT_FOUND(HttpStatus.NOT_FOUND, "B002", "존재하지 않는 강의실입니다."),
 
+    // 게시판 관련
+    BOARD_NAME_DUPLICATION(HttpStatus.CONFLICT, "B001", "이미 존재하는 게시판 이름입니다."),
+    BOARD_NOT_FOUND(HttpStatus.NOT_FOUND, "B002", "존재하지 않는 게시판입니다."),
+
+    // 게시글 관련
+    POST_NOT_FOUND(HttpStatus.NOT_FOUND, "P001", "존재하지 않는 게시글입니다."),
+    POST_NO_CHANGES(HttpStatus.BAD_REQUEST, "P002", "변경된 내용이 없습니다."),
+    POST_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "P003", "게시글 수정 권한이 없습니다."),
+    POST_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "P004", "게시글 삭제 권한이 없습니다."),
+
+    // 댓글 관련
+    COMMENT_NOT_FOUND(HttpStatus.NOT_FOUND, "CM001", "존재하지 않는 댓글입니다."),
+    COMMENT_NO_CHANGES(HttpStatus.BAD_REQUEST, "CM002", "변경된 내용이 없습니다."),
+    COMMENT_UPDATE_FORBIDDEN(HttpStatus.FORBIDDEN, "CM003", "댓글 수정 권한이 없습니다."),
+    COMMENT_DELETE_FORBIDDEN(HttpStatus.FORBIDDEN, "CM004", "댓글 삭제 권한이 없습니다."),
+
+    // 버스 시간표 관련
+    BUS_SERVICE_ENDED(HttpStatus.NOT_FOUND, "BS001", "오늘 운행이 종료되었습니다.")
+
     ;
 
     private final HttpStatus httpStatus;

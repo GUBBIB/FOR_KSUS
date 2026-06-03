@@ -1,6 +1,6 @@
 package com.github.gubbib.backend.DTO.Building;
 
-import com.github.gubbib.backend.Domain.Building.Building;
+import com.github.gubbib.backend.Domain.TimeTable.Building.Building;
 
 public record BuildingResponseDTO (
         Long id,

@@ -1,17 +1,15 @@
 package com.github.gubbib.backend.Service.Building;
 
 import com.github.gubbib.backend.DTO.Building.BuildingResponseDTO;
-import com.github.gubbib.backend.Domain.Building.Building;
+import com.github.gubbib.backend.Domain.TimeTable.Building.Building;
 import com.github.gubbib.backend.Exception.ErrorCode;
 import com.github.gubbib.backend.Exception.GlobalException;
 import com.github.gubbib.backend.Repository.Building.BuildingRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Comparator;
 import java.util.List;
 
 @Service

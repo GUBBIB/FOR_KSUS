@@ -1,8 +1,8 @@
 package com.github.gubbib.backend.Service.LectureTime;
 
 import com.github.gubbib.backend.DTO.ClassRoom.ClassRoomTimetableResponseDTO;
-import com.github.gubbib.backend.Domain.Building.Building;
-import com.github.gubbib.backend.Domain.LectureTime.LectureTime;
+import com.github.gubbib.backend.Domain.TimeTable.Building.Building;
+import com.github.gubbib.backend.Domain.TimeTable.LectureTime.LectureTime;
 import com.github.gubbib.backend.Repository.LectureTime.LectureTimeRepository;
 import com.github.gubbib.backend.Service.Building.BuildingService;
 import lombok.RequiredArgsConstructor;
