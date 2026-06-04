@@ -1,0 +1,178 @@
+.bus-page {
+  min-height: 100vh;
+  background: #f4f7fb;
+}
+
+.bus-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 28px;
+}
+
+.bus-hero {
+  padding: 36px;
+  margin-bottom: 20px;
+  border: 1px solid #e3e8f0;
+  border-radius: 20px;
+  background: linear-gradient(135deg, #ffffff, #eef3ff);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.bus-badge {
+  display: inline-block;
+  padding: 6px 12px;
+  margin-bottom: 10px;
+  border-radius: 999px;
+  color: #4f46e5;
+  background: #eef2ff;
+  font-weight: 700;
+}
+
+.bus-hero h1 {
+  margin: 0 0 12px;
+  color: #111827;
+  font-size: 32px;
+}
+
+.bus-hero p {
+  margin: 0;
+  color: #4b5563;
+}
+
+.bus-filter-card,
+.bus-card {
+  padding: 24px;
+  border: 1px solid #e3e8f0;
+  border-radius: 20px;
+  background: #ffffff;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.bus-filter-card {
+  margin-bottom: 20px;
+}
+
+.bus-filter-card label {
+  display: grid;
+  gap: 8px;
+  max-width: 420px;
+}
+
+.bus-filter-card span {
+  color: #374151;
+  font-weight: 800;
+}
+
+.bus-filter-card select {
+  padding: 13px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  background: #ffffff;
+  font-size: 15px;
+}
+
+.bus-filter-card select:focus {
+  outline: none;
+  border-color: #4f46e5;
+}
+
+.bus-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.3fr;
+  gap: 20px;
+}
+
+.card-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 18px;
+}
+
+.card-title-row h2 {
+  margin: 0;
+  color: #111827;
+  font-size: 20px;
+}
+
+.card-title-row span {
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #eef2ff;
+  color: #4f46e5;
+  font-weight: 800;
+}
+
+.next-bus-time {
+  padding: 22px;
+  border-radius: 18px;
+  background: #f8fafc;
+}
+
+.next-bus-time strong {
+  display: block;
+  color: #4f46e5;
+  font-size: 30px;
+}
+
+.next-bus-time p {
+  margin: 8px 0 0;
+  color: #6b7280;
+}
+
+.bus-progress-line {
+  height: 8px;
+  margin-top: 24px;
+  border-radius: 999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.bus-progress-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: #4f46e5;
+}
+
+.schedule-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.schedule-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: #f8fafc;
+}
+
+.schedule-item strong {
+  color: #111827;
+}
+
+.schedule-item span {
+  color: #6b7280;
+  font-weight: 700;
+}
+
+.empty-text {
+  color: #6b7280;
+}
+
+.error-text {
+  margin-top: 0;
+  color: #dc2626;
+  font-weight: 700;
+}
+
+@media (max-width: 900px) {
+  .bus-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .schedule-list {
+    grid-template-columns: 1fr;
+  }
+}
