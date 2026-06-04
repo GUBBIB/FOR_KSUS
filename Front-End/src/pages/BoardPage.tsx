@@ -1,198 +1,176 @@
-import { useEffect, useState } from "react";
+import { useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import Header from "../components/Header";
-import { getBusSchedules, getBusStops, getNextBus } from "../api/busApi";
-import "./BusPage.css";
+import "./BoardPage.css";
 
-type BusStop = {
+type Post = {
   id: number;
-  name: string;
+  title: string;
+  content: string;
+  writer: string;
+  writerEmail: string;
+  viewCount: number;
+  createdAt: string;
 };
 
-type BusSchedule = {
-  id: number;
-  departureTime: string;
-};
+type SortType = "latest" | "views";
 
-type NextBus = {
-  departureTime: string;
-  remainingMinutes: number;
-};
+const POSTS_PER_PAGE = 10;
 
-function BusPage() {
-  const [busStops, setBusStops] = useState<BusStop[]>([]);
-  const [selectedBusStopId, setSelectedBusStopId] = useState<number | null>(
-    null
+function BoardPage() {
+  const [posts] = useState<Post[]>(() => {
+    return JSON.parse(localStorage.getItem("posts") || "[]");
+  });
+
+  const [searchKeyword, setSearchKeyword] = useState("");
+  const [sortType, setSortType] = useState<SortType>("latest");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const filteredAndSortedPosts = useMemo(() => {
+    const keyword = searchKeyword.trim().toLowerCase();
+
+    const filtered = posts.filter((post) => {
+      return (
+        post.title.toLowerCase().includes(keyword) ||
+        post.content.toLowerCase().includes(keyword) ||
+        post.writer.toLowerCase().includes(keyword)
+      );
+    });
+
+    return [...filtered].sort((a, b) => {
+      if (sortType === "views") {
+        return b.viewCount - a.viewCount;
+      }
+
+      const dateDiff =
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+
+      if (dateDiff !== 0) {
+        return dateDiff;
+      }
+
+      return b.id - a.id;
+    });
+  }, [posts, searchKeyword, sortType]);
+
+  const totalPages = Math.ceil(filteredAndSortedPosts.length / POSTS_PER_PAGE);
+
+  const paginatedPosts = filteredAndSortedPosts.slice(
+    (currentPage - 1) * POSTS_PER_PAGE,
+    currentPage * POSTS_PER_PAGE
   );
 
-  const [schedules, setSchedules] = useState<BusSchedule[]>([]);
-  const [nextBus, setNextBus] = useState<NextBus | null>(null);
+  const handleChangeSort = (nextSortType: SortType) => {
+    setSortType(nextSortType);
+    setCurrentPage(1);
+  };
 
-  const [isStopLoading, setIsStopLoading] = useState(false);
-  const [isScheduleLoading, setIsScheduleLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
-
-  const busProgress = nextBus
-    ? Math.max(0, Math.min(100, ((20 - nextBus.remainingMinutes) / 20) * 100))
-    : 0;
-
-  useEffect(() => {
-    const fetchBusStops = async () => {
-      try {
-        setIsStopLoading(true);
-        setErrorMessage("");
-
-        const data = await getBusStops();
-        const stopData: BusStop[] = Array.isArray(data) ? data : [data];
-
-        setBusStops(stopData);
-
-        if (stopData.length > 0) {
-          setSelectedBusStopId(stopData[0].id);
-        }
-      } catch (error) {
-        console.error(error);
-        setErrorMessage(
-          error instanceof Error ? error.message : "정류장 목록 조회 실패"
-        );
-      } finally {
-        setIsStopLoading(false);
-      }
-    };
-
-    fetchBusStops();
-  }, []);
-
-  useEffect(() => {
-    if (!selectedBusStopId) return;
-
-    const fetchBusInfo = async () => {
-      try {
-        setIsScheduleLoading(true);
-        setErrorMessage("");
-        setSchedules([]);
-        setNextBus(null);
-
-        const [scheduleData, nextBusData] = await Promise.all([
-          getBusSchedules(selectedBusStopId),
-          getNextBus(selectedBusStopId).catch(() => null),
-        ]);
-
-        const scheduleList: BusSchedule[] = Array.isArray(scheduleData)
-          ? scheduleData
-          : [scheduleData];
-
-        setSchedules(scheduleList);
-        setNextBus(nextBusData);
-      } catch (error) {
-        console.error(error);
-        setErrorMessage(
-          error instanceof Error ? error.message : "버스 정보 조회 실패"
-        );
-      } finally {
-        setIsScheduleLoading(false);
-      }
-    };
-
-    fetchBusInfo();
-  }, [selectedBusStopId]);
-
-  const selectedBusStop = busStops.find(
-    (stop) => stop.id === selectedBusStopId
-  );
+  const handleChangeSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchKeyword(e.target.value);
+    setCurrentPage(1);
+  };
 
   return (
-    <div className="bus-page">
+    <div className="board-page">
       <Header />
 
-      <main className="bus-container">
-        <section className="bus-hero">
+      <main className="board-container">
+        <section className="board-hero">
           <div>
-            <p className="bus-badge">SHUTTLE BUS</p>
-            <h1>버스 알림</h1>
-            <p>정류장별 다음 버스와 전체 시간표를 확인할 수 있습니다.</p>
+            <p className="board-badge">COMMUNITY</p>
           </div>
+
+          <Link to="/community/write" className="write-button">
+            글쓰기
+          </Link>
         </section>
 
-        <section className="bus-filter-card">
-          {errorMessage && <p className="error-text">{errorMessage}</p>}
+        <section className="board-toolbar">
+          <div className="sort-tabs">
+            <button
+              type="button"
+              className={sortType === "views" ? "active" : ""}
+              onClick={() => handleChangeSort("views")}
+            >
+              조회순
+            </button>
 
-          {isStopLoading ? (
-            <p className="empty-text">정류장 목록 불러오는 중...</p>
+            <span>|</span>
+
+            <button
+              type="button"
+              className={sortType === "latest" ? "active" : ""}
+              onClick={() => handleChangeSort("latest")}
+            >
+              최신순
+            </button>
+          </div>
+
+          <input
+            className="board-search"
+            placeholder="검색어를 입력하세요"
+            value={searchKeyword}
+            onChange={handleChangeSearch}
+          />
+        </section>
+
+        <section className="post-list-card">
+          {paginatedPosts.length === 0 ? (
+            <p className="empty-text">게시글이 없습니다.</p>
           ) : (
-            <label>
-              <span>정류장 선택</span>
+            <ul className="post-list">
+              {paginatedPosts.map((post) => (
+                <li key={post.id} className="post-item">
+                  <Link to={`/community/posts/${post.id}`}>
+                    <h3>{post.title}</h3>
+                  </Link>
 
-              <select
-                value={selectedBusStopId ?? ""}
-                onChange={(e) => setSelectedBusStopId(Number(e.target.value))}
-              >
-                {busStops.map((stop) => (
-                  <option key={stop.id} value={stop.id}>
-                    {stop.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+                  <p>{post.content}</p>
+
+                  <div className="post-meta">
+                    <span>{post.writer}</span>
+                    <span>조회수 {post.viewCount}</span>
+                    <span>{post.createdAt}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
         </section>
 
-        {isScheduleLoading ? (
-          <section className="bus-card">
-            <p className="empty-text">버스 정보 불러오는 중...</p>
-          </section>
-        ) : (
-          <section className="bus-grid">
-            <article className="bus-card next-bus-card">
-              <div className="card-title-row">
-                <h2>다음 버스</h2>
-                <span>{selectedBusStop?.name || "정류장 없음"}</span>
-              </div>
+        {totalPages > 1 && (
+          <div className="pagination">
+            <button
+              type="button"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(currentPage - 1)}
+            >
+              이전
+            </button>
 
-              {nextBus ? (
-                <>
-                  <div className="next-bus-time">
-                    <strong>{nextBus.remainingMinutes}분 후 도착</strong>
-                    <p>출발 시간 {nextBus.departureTime}</p>
-                  </div>
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index + 1}
+                type="button"
+                className={currentPage === index + 1 ? "active" : ""}
+                onClick={() => setCurrentPage(index + 1)}
+              >
+                {index + 1}
+              </button>
+            ))}
 
-                  <div className="bus-progress-line">
-                    <div
-                      className="bus-progress-fill"
-                      style={{ width: `${busProgress}%` }}
-                    />
-                  </div>
-                </>
-              ) : (
-                <p className="empty-text">
-                  오늘 운행이 종료되었거나 다음 버스 정보가 없습니다.
-                </p>
-              )}
-            </article>
-
-            <article className="bus-card schedule-card">
-              <div className="card-title-row">
-                <h2>전체 시간표</h2>
-                <span>{schedules.length}개</span>
-              </div>
-
-              {schedules.length === 0 ? (
-                <p className="empty-text">등록된 시간표가 없습니다.</p>
-              ) : (
-                <div className="schedule-list">
-                  {schedules.map((schedule) => (
-                    <div key={schedule.id} className="schedule-item">
-                      <strong>{schedule.departureTime}</strong>
-                      <span>출발</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </article>
-          </section>
+            <button
+              type="button"
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(currentPage + 1)}
+            >
+              다음
+            </button>
+          </div>
         )}
       </main>
     </div>
   );
 }
 
-export default BusPage;
+export default BoardPage;
