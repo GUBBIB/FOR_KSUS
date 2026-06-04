@@ -9,6 +9,7 @@ import com.github.gubbib.backend.Repository.User.UserRepository;
 import com.github.gubbib.backend.Service.Security.CustomOauth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -76,7 +77,12 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/v3/api-docs/**",
                                 "/swagger-ui.html",
-                                "/api/v1/everytime/**"
+                                "/api/v1/everytime/**",
+                                "/api/v1/bus-notifications/**"
+                        ).permitAll()
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/api/v1/boards/**"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )
