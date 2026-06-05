@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import { getClassroomTimetable } from "../api/classroomApi";
+import "./ClassroomDetailPage.css";
 
 type Timetable = {
   lectureName: string;
@@ -21,10 +22,7 @@ const dayLabels: Record<number, string> = {
 
 const formatTime = (time: number) => {
   const timeString = time.toString().padStart(4, "0");
-  const hour = timeString.slice(0, 2);
-  const minute = timeString.slice(2, 4);
-
-  return `${hour}:${minute}`;
+  return `${timeString.slice(0, 2)}:${timeString.slice(2, 4)}`;
 };
 
 function ClassroomDetailPage() {
@@ -48,15 +46,12 @@ function ClassroomDetailPage() {
           Number(classroomId)
         );
 
-        setTimetable(data);
+        setTimetable(Array.isArray(data) ? data : [data]);
       } catch (error) {
         console.error(error);
-
-        if (error instanceof Error) {
-          setErrorMessage(error.message);
-        } else {
-          setErrorMessage("강의실 시간표 조회 실패");
-        }
+        setErrorMessage(
+          error instanceof Error ? error.message : "강의실 시간표 조회 실패"
+        );
       } finally {
         setIsLoading(false);
       }
@@ -75,11 +70,7 @@ function ClassroomDetailPage() {
     };
 
     timetable.forEach((lecture) => {
-      if (!result[lecture.dayOfWeek]) {
-        result[lecture.dayOfWeek] = [];
-      }
-
-      result[lecture.dayOfWeek].push(lecture);
+      result[lecture.dayOfWeek]?.push(lecture);
     });
 
     Object.keys(result).forEach((day) => {
@@ -90,53 +81,96 @@ function ClassroomDetailPage() {
   }, [timetable]);
 
   return (
-    <div>
+    <div className="classroom-detail-page">
       <Header />
 
-      <main>
-        <h1>강의실 시간표</h1>
+      <main className="classroom-detail-container">
+        <section className="classroom-detail-hero">
+          <div>
+            <p className="classroom-detail-badge">TIMETABLE</p>
+            <h1>강의실 시간표</h1>
+            <p>
+              선택한 강의실의 요일별 수업 정보를 확인할 수 있습니다.
+            </p>
+          </div>
 
-        <p>
-          건물 ID: {buildingId} / 강의실 ID: {classroomId}
-        </p>
+          <button onClick={() => navigate("/classrooms")}>
+            빈 강의실 조회로 돌아가기
+          </button>
+        </section>
 
-        <button onClick={() => navigate("/classrooms")}>
-          빈 강의실 조회로 돌아가기
-        </button>
+        <section className="classroom-info-card">
+          <div>
+            <span>건물 ID</span>
+            <strong>{buildingId}</strong>
+          </div>
 
-        <hr />
+          <div>
+            <span>강의실 ID</span>
+            <strong>{classroomId}</strong>
+          </div>
 
-        {isLoading && <p>시간표 불러오는 중...</p>}
+          <div>
+            <span>등록된 수업</span>
+            <strong>{timetable.length}개</strong>
+          </div>
+        </section>
 
-        {errorMessage && <p style={{ color: "red" }}>{errorMessage}</p>}
-
-        {!isLoading && timetable.length === 0 && !errorMessage && (
-          <p>등록된 시간표가 없습니다. 이 강의실은 현재 시간표상 비어 있습니다.</p>
+        {isLoading && (
+          <section className="classroom-detail-card">
+            <p className="empty-text">시간표 불러오는 중...</p>
+          </section>
         )}
 
-        {!isLoading &&
-          Object.entries(timetableByDay).map(([day, lectures]) => (
-            <section key={day}>
-              <h2>{dayLabels[Number(day)]}</h2>
+        {errorMessage && (
+          <section className="classroom-detail-card">
+            <p className="error-text">{errorMessage}</p>
+          </section>
+        )}
 
-              {lectures.length === 0 ? (
-                <p>수업 없음</p>
-              ) : (
-                <ul>
-                  {lectures.map((lecture, index) => (
-                    <li key={`${lecture.lectureName}-${index}`}>
-                      <strong>{lecture.lectureName}</strong>{" "}
-                      <span>{lecture.professor}</span>{" "}
-                      <span>
-                        {formatTime(lecture.startTime)} ~{" "}
-                        {formatTime(lecture.endTime)}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </section>
-          ))}
+        {!isLoading && !errorMessage && timetable.length === 0 && (
+          <section className="classroom-detail-card">
+            <p className="empty-text">
+              등록된 시간표가 없습니다. 이 강의실은 시간표상 비어 있습니다.
+            </p>
+          </section>
+        )}
+
+        {!isLoading && !errorMessage && timetable.length > 0 && (
+          <section className="timetable-grid">
+            {Object.entries(timetableByDay).map(([day, lectures]) => (
+              <article key={day} className="day-card">
+                <div className="day-card-header">
+                  <h2>{dayLabels[Number(day)]}</h2>
+                  <span>{lectures.length}개 수업</span>
+                </div>
+
+                {lectures.length === 0 ? (
+                  <p className="empty-text">수업 없음</p>
+                ) : (
+                  <div className="lecture-list">
+                    {lectures.map((lecture, index) => (
+                      <div
+                        key={`${lecture.lectureName}-${lecture.startTime}-${index}`}
+                        className="lecture-item"
+                      >
+                        <div>
+                          <strong>{lecture.lectureName}</strong>
+                          <p>{lecture.professor}</p>
+                        </div>
+
+                        <span>
+                          {formatTime(lecture.startTime)} ~{" "}
+                          {formatTime(lecture.endTime)}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </article>
+            ))}
+          </section>
+        )}
       </main>
     </div>
   );

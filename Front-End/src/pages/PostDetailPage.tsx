@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
+import "./PostDetailPage.css";
 
 type User = {
   email: string;
@@ -36,17 +37,6 @@ type Reply = {
   createdAt: string;
 };
 
-const defaultComments: Comment[] = [
-  {
-    id: 1,
-    postId: 1,
-    content: "저도 궁금했어요.",
-    writer: "익명1",
-    writerEmail: "test1@ks.ac.kr",
-    createdAt: "2026-06-05",
-  },
-];
-
 function PostDetailPage() {
   const navigate = useNavigate();
   const { postId } = useParams();
@@ -59,27 +49,13 @@ function PostDetailPage() {
     JSON.parse(localStorage.getItem("posts") || "[]")
   );
 
-  const [comments, setComments] = useState<Comment[]>(() => {
-    const savedComments = localStorage.getItem("comments");
+  const [comments, setComments] = useState<Comment[]>(
+    JSON.parse(localStorage.getItem("comments") || "[]")
+  );
 
-    if (savedComments) {
-      return JSON.parse(savedComments);
-    }
-
-    localStorage.setItem("comments", JSON.stringify(defaultComments));
-    return defaultComments;
-  });
-
-  const [replies, setReplies] = useState<Reply[]>(() => {
-    const savedReplies = localStorage.getItem("replies");
-
-    if (savedReplies) {
-      return JSON.parse(savedReplies);
-    }
-
-    localStorage.setItem("replies", JSON.stringify([]));
-    return [];
-  });
+  const [replies, setReplies] = useState<Reply[]>(
+    JSON.parse(localStorage.getItem("replies") || "[]")
+  );
 
   const [commentContent, setCommentContent] = useState("");
 
@@ -127,9 +103,11 @@ function PostDetailPage() {
 
   const post = posts.find((item) => item.id === Number(postId));
 
-  const postComments = comments.filter(
-    (comment) => comment.postId === Number(postId)
-  );
+  const postComments = useMemo(() => {
+    return comments
+      .filter((comment) => comment.postId === Number(postId))
+      .sort((a, b) => b.id - a.id);
+  }, [comments, postId]);
 
   const isPostOwner = currentUser?.email === post?.writerEmail;
 
@@ -321,193 +299,252 @@ function PostDetailPage() {
 
   if (!post) {
     return (
-      <div>
+      <div className="post-detail-page">
         <Header />
-        <p>게시글을 찾을 수 없습니다.</p>
-        <button onClick={() => navigate("/community")}>목록으로</button>
+
+        <main className="post-detail-container">
+          <section className="post-card">
+            <p className="empty-text">게시글을 찾을 수 없습니다.</p>
+            <button className="basic-button" onClick={() => navigate("/community")}>
+              목록으로
+            </button>
+          </section>
+        </main>
       </div>
     );
   }
 
   return (
-    <div>
+    <div className="post-detail-page">
       <Header />
 
-      <main>
-        <h1>{post.title}</h1>
+      <main className="post-detail-container">
+        <section className="post-card">
+          <div className="post-title-row">
+            <h1>{post.title}</h1>
+            <span>{post.writer}</span>
+          </div>
 
-        <p>{post.content}</p>
+          <div className="post-meta-row">
+            <span>조회수 {post.viewCount}</span>
+            <span>{post.createdAt}</span>
+          </div>
 
-        <small>
-          작성자: {post.writer} / 조회수: {post.viewCount} / 작성일:{" "}
-          {post.createdAt}
-        </small>
+          <div className="post-content-box">{post.content}</div>
 
-        {isPostOwner && (
-          <div>
-            <button onClick={() => navigate(`/community/write?postId=${post.id}`)}>
-              수정
+          <div className="post-actions">
+            <button className="basic-button" onClick={() => navigate("/community")}>
+              목록
             </button>
 
-            <button onClick={handleDeletePost}>삭제</button>
+            {isPostOwner && (
+              <>
+                <button
+                  className="basic-button"
+                  onClick={() => navigate(`/community/write?postId=${post.id}`)}
+                >
+                  수정
+                </button>
+
+                <button className="danger-button" onClick={handleDeletePost}>
+                  삭제
+                </button>
+              </>
+            )}
           </div>
-        )}
+        </section>
 
-        <hr />
+        <section className="comment-card">
+          <div className="comment-header">
+            <h2>댓글</h2>
+            <span>{postComments.length}개</span>
+          </div>
 
-        <h2>댓글</h2>
+          <form className="comment-form" onSubmit={handleCreateComment}>
+            <input
+              value={commentContent}
+              onChange={(e) => setCommentContent(e.target.value)}
+              placeholder="댓글을 입력하세요."
+            />
 
-        <form onSubmit={handleCreateComment}>
-          <input
-            value={commentContent}
-            onChange={(e) => setCommentContent(e.target.value)}
-            placeholder="댓글 입력"
-          />
+            <button type="submit">등록</button>
+          </form>
 
-          <button type="submit">댓글 작성</button>
-        </form>
+          {postComments.length === 0 ? (
+            <p className="empty-text">아직 댓글이 없습니다.</p>
+          ) : (
+            <ul className="comment-list">
+              {postComments.map((comment) => {
+                const isCommentOwner = currentUser?.email === comment.writerEmail;
+                const commentReplies = replies
+                  .filter((reply) => reply.commentId === comment.id)
+                  .sort((a, b) => a.id - b.id);
 
-        <ul>
-          {postComments.map((comment) => {
-            const isCommentOwner = currentUser?.email === comment.writerEmail;
-            const commentReplies = replies.filter(
-              (reply) => reply.commentId === comment.id
-            );
+                return (
+                  <li key={comment.id} className="comment-item">
+                    {editingCommentId === comment.id ? (
+                      <div className="edit-box">
+                        <strong>{comment.writer}</strong>
 
-            return (
-              <li key={comment.id}>
-                {editingCommentId === comment.id ? (
-                  <div>
-                    <strong>{comment.writer}</strong>{" "}
-                    <input
-                      value={editingContent}
-                      onChange={(e) => setEditingContent(e.target.value)}
-                    />
+                        <input
+                          value={editingContent}
+                          onChange={(e) => setEditingContent(e.target.value)}
+                        />
 
-                    <button onClick={() => handleUpdateComment(comment.id)}>
-                      저장
-                    </button>
+                        <div className="inline-actions">
+                          <button onClick={() => handleUpdateComment(comment.id)}>
+                            저장
+                          </button>
 
-                    <button
-                      onClick={() => {
-                        setEditingCommentId(null);
-                        setEditingContent("");
-                      }}
-                    >
-                      취소
-                    </button>
-                  </div>
-                ) : (
-                  <div>
-                    <strong>{comment.writer}</strong>{" "}
-                    <span>{comment.content}</span>{" "}
-                    <small>{comment.createdAt}</small>{" "}
+                          <button
+                            onClick={() => {
+                              setEditingCommentId(null);
+                              setEditingContent("");
+                            }}
+                          >
+                            취소
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="comment-main">
+                        <div>
+                          <strong>{comment.writer}</strong>
+                          <span>{comment.content}</span>
+                        </div>
 
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setReplyTargetCommentId(
-                          replyTargetCommentId === comment.id ? null : comment.id
-                        )
-                      }
-                    >
-                      답글
-                    </button>
-
-                    {isCommentOwner && (
-                      <>
-                        <button onClick={() => handleStartEditComment(comment)}>
-                          수정
-                        </button>
-
-                        <button onClick={() => handleDeleteComment(comment)}>
-                          삭제
-                        </button>
-                      </>
+                        <small>{comment.createdAt}</small>
+                      </div>
                     )}
-                  </div>
-                )}
 
-                {replyTargetCommentId === comment.id && (
-                  <div style={{ marginLeft: "24px" }}>
-                    <input
-                      value={replyContent}
-                      onChange={(e) => setReplyContent(e.target.value)}
-                      placeholder="대댓글 입력"
-                    />
+                    {editingCommentId !== comment.id && (
+                      <div className="comment-actions">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setReplyTargetCommentId(
+                              replyTargetCommentId === comment.id
+                                ? null
+                                : comment.id
+                            )
+                          }
+                        >
+                          답글
+                        </button>
 
-                    <button onClick={() => handleCreateReply(comment.id)}>
-                      대댓글 작성
-                    </button>
-                  </div>
-                )}
+                        {isCommentOwner && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleStartEditComment(comment)}
+                            >
+                              수정
+                            </button>
 
-                {commentReplies.length > 0 && (
-                  <ul style={{ marginLeft: "24px" }}>
-                    {commentReplies.map((reply) => {
-                      const isReplyOwner =
-                        currentUser?.email === reply.writerEmail;
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteComment(comment)}
+                            >
+                              삭제
+                            </button>
+                          </>
+                        )}
+                      </div>
+                    )}
 
-                      return (
-                        <li key={reply.id}>
-                          {editingReplyId === reply.id ? (
-                            <div>
-                              <strong>{reply.writer}</strong>{" "}
-                              <input
-                                value={editingReplyContent}
-                                onChange={(e) =>
-                                  setEditingReplyContent(e.target.value)
-                                }
-                              />
+                    {replyTargetCommentId === comment.id && (
+                      <div className="reply-form">
+                        <input
+                          value={replyContent}
+                          onChange={(e) => setReplyContent(e.target.value)}
+                          placeholder="대댓글을 입력하세요."
+                        />
 
-                              <button
-                                onClick={() => handleUpdateReply(reply.id)}
-                              >
-                                저장
-                              </button>
+                        <button onClick={() => handleCreateReply(comment.id)}>
+                          등록
+                        </button>
+                      </div>
+                    )}
 
-                              <button
-                                onClick={() => {
-                                  setEditingReplyId(null);
-                                  setEditingReplyContent("");
-                                }}
-                              >
-                                취소
-                              </button>
-                            </div>
-                          ) : (
-                            <div>
-                              <span>ㄴ </span>
-                              <strong>{reply.writer}</strong>{" "}
-                              <span>{reply.content}</span>{" "}
-                              <small>{reply.createdAt}</small>{" "}
+                    {commentReplies.length > 0 && (
+                      <ul className="reply-list">
+                        {commentReplies.map((reply) => {
+                          const isReplyOwner =
+                            currentUser?.email === reply.writerEmail;
 
-                              {isReplyOwner && (
+                          return (
+                            <li key={reply.id} className="reply-item">
+                              {editingReplyId === reply.id ? (
+                                <div className="edit-box">
+                                  <strong>{reply.writer}</strong>
+
+                                  <input
+                                    value={editingReplyContent}
+                                    onChange={(e) =>
+                                      setEditingReplyContent(e.target.value)
+                                    }
+                                  />
+
+                                  <div className="inline-actions">
+                                    <button
+                                      onClick={() => handleUpdateReply(reply.id)}
+                                    >
+                                      저장
+                                    </button>
+
+                                    <button
+                                      onClick={() => {
+                                        setEditingReplyId(null);
+                                        setEditingReplyContent("");
+                                      }}
+                                    >
+                                      취소
+                                    </button>
+                                  </div>
+                                </div>
+                              ) : (
                                 <>
-                                  <button
-                                    onClick={() => handleStartEditReply(reply)}
-                                  >
-                                    수정
-                                  </button>
+                                  <div className="reply-main">
+                                    <span className="reply-mark">ㄴ</span>
 
-                                  <button
-                                    onClick={() => handleDeleteReply(reply)}
-                                  >
-                                    삭제
-                                  </button>
+                                    <div>
+                                      <strong>{reply.writer}</strong>
+                                      <span>{reply.content}</span>
+                                    </div>
+
+                                    <small>{reply.createdAt}</small>
+                                  </div>
+
+                                  {isReplyOwner && (
+                                    <div className="comment-actions">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleStartEditReply(reply)}
+                                      >
+                                        수정
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => handleDeleteReply(reply)}
+                                      >
+                                        삭제
+                                      </button>
+                                    </div>
+                                  )}
                                 </>
                               )}
-                            </div>
-                          )}
-                        </li>
-                      );
-                    })}
-                  </ul>
-                )}
-              </li>
-            );
-          })}
-        </ul>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    )}
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </section>
       </main>
     </div>
   );

@@ -251,3 +251,26 @@
     height: 240px;
   }
 }
+
+.bus-card-header {
+  align-items: flex-start;
+}
+
+.bus-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.bus-title-row h2 {
+  margin: 0;
+}
+
+.bus-stop-select {
+  padding: 8px 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #374151;
+  font-weight: 700;
+}
