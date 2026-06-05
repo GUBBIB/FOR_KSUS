@@ -1,7 +1,13 @@
 import { useMemo, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import "./BoardPage.css";
+
+type User = {
+  email: string;
+  nickname: string;
+  role?: string;
+};
 
 type Post = {
   id: number;
@@ -18,6 +24,12 @@ type SortType = "latest" | "views";
 const POSTS_PER_PAGE = 10;
 
 function BoardPage() {
+  const navigate = useNavigate();
+
+  const currentUser: User | null = JSON.parse(
+    localStorage.getItem("currentUser") || "null"
+  ); // (변경됨)
+
   const [posts] = useState<Post[]>(() => {
     return JSON.parse(localStorage.getItem("posts") || "[]");
   });
@@ -70,6 +82,16 @@ function BoardPage() {
     setCurrentPage(1);
   };
 
+  const handleWriteClick = () => {
+    if (!currentUser) {
+      alert("로그인 후 글쓰기가 가능합니다.");
+      navigate("/login");
+      return;
+    }
+
+    navigate("/community/write");
+  }; // (변경됨)
+
   return (
     <div className="board-page">
       <Header />
@@ -78,11 +100,17 @@ function BoardPage() {
         <section className="board-hero">
           <div>
             <p className="board-badge">COMMUNITY</p>
+            <h1>커뮤니티</h1>
+            <p>경성대 학생들과 자유롭게 이야기를 나눠보세요.</p>
           </div>
 
-          <Link to="/community/write" className="write-button">
+          <button
+            type="button"
+            className="write-button"
+            onClick={handleWriteClick}
+          >
             글쓰기
-          </Link>
+          </button>
         </section>
 
         <section className="board-toolbar">

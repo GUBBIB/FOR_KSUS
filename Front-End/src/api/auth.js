@@ -1,6 +1,5 @@
 const API_BASE = "/api/v1/auth";
 
-// (변경됨) fetch 응답 에러 처리 공통 함수
 const handleResponse = async (response) => {
   const data = await response.json().catch(() => null);
 
@@ -15,11 +14,11 @@ export const register = async (data) => {
   const response = await fetch(`${API_BASE}/register`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include", // (변경됨)
+    credentials: "include",
     body: JSON.stringify(data),
   });
 
-  return handleResponse(response); // (변경됨)
+  return handleResponse(response);
 };
 
 export const requestVerify = async (data) => {
@@ -30,31 +29,32 @@ export const requestVerify = async (data) => {
     body: JSON.stringify(data),
   });
 
-  return handleResponse(response); // (변경됨)
+  return handleResponse(response);
 };
 
 export const verifyCode = async (data) => {
   const response = await fetch(`${API_BASE}/student/verify`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include", // (변경됨)
+    credentials: "include",
     body: JSON.stringify(data),
   });
 
-  return handleResponse(response); // (변경됨)
+  return handleResponse(response);
 };
 
 export const login = async (data) => {
   const response = await fetch(`${API_BASE}/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    credentials: "include", // (변경됨)
+    credentials: "include",
     body: JSON.stringify(data),
   });
 
-  return handleResponse(response); // (변경됨)
+  return handleResponse(response);
 };
 
+// (변경됨) 백엔드 로그아웃 API 호출
 export const logout = async () => {
   const response = await fetch(`${API_BASE}/logout`, {
     method: "POST",
