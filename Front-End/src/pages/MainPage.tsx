@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import { getBusStops, getNextBus } from "../api/busApi";
@@ -244,36 +244,48 @@ function MainPage() {
       <Header />
 
       <main className="main-container">
+        <section className="map-hero-card">
+          <div className="map-hero-text">
+            <p className="hero-badge">경성대학교 공대 학생들을 위한 사이트</p>  
+            <h1>공대 생활, 이젠 편리하게!</h1>
+            <p>
+              공대 캠퍼스 맵, 셔틀버스 정보, 빈 강의실 찾기 등 다양한 기능을
+              제공합니다.
+            </p>
 
-<section className="map-hero-card">
-  <div className="map-hero-text">
-    <p className="hero-badge">CAMPUS MAP</p>
-  </div>
+            
+          </div>
 
-  <Link to="/engineering-map" className="map-preview">
-    <img src="/images/engineering-map.png" alt="공대 캠퍼스 맵" />
-  </Link>
-</section>
+          <Link to="/engineering-map" className="map-preview">
+            <img src="/images/engineering-map.png" alt="공대 캠퍼스 맵" />
+          </Link>
+        </section>
 
         <section className="dashboard-grid">
           <article className="dashboard-card bus-card">
-            <div className="card-header">
-              <h2>셔틀버스 정보</h2>
+            <div className="card-header bus-card-header">
+              <div className="bus-title-row">
+                <h2>셔틀버스 정보</h2>
+
+                {busStops.length > 0 && (
+                  <select
+                    className="bus-stop-select"
+                    value={selectedBusStop?.id ?? ""}
+                    onChange={(e) =>
+                      handleChangeBusStop(Number(e.target.value))
+                    }
+                  >
+                    {busStops.map((stop) => (
+                      <option key={stop.id} value={stop.id}>
+                        {stop.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+
               <Link to="/bus">상세보기</Link>
             </div>
-
-            {busStops.length > 0 && (
-              <select
-                value={selectedBusStop?.id ?? ""}
-                onChange={(e) => handleChangeBusStop(Number(e.target.value))}
-              >
-                {busStops.map((stop) => (
-                  <option key={stop.id} value={stop.id}>
-                    {stop.name}
-                  </option>
-                ))}
-              </select>
-            )}
 
             <div className="bus-route">
               <strong>{selectedBusStop?.name || "정류장 정보 없음"}</strong>
@@ -295,10 +307,13 @@ function MainPage() {
             </div>
 
             {nextBus ? (
-              <p className="sub-text">다음 출발 시간: {nextBus.departureTime}</p>
+              <p className="sub-text">
+                다음 출발 시간: {nextBus.departureTime}
+              </p>
             ) : (
               <p className="sub-text">
-                {busError || "오늘 운행이 종료되었거나 다음 버스 정보가 없습니다."}
+                {busError ||
+                  "오늘 운행이 종료되었거나 다음 버스 정보가 없습니다."}
               </p>
             )}
           </article>
@@ -363,7 +378,9 @@ function MainPage() {
               <ul>
                 {popularPosts.map((post) => (
                   <li key={post.id}>
-                    <Link to={`/community/posts/${post.id}`}>{post.title}</Link>
+                    <Link to={`/community/posts/${post.id}`}>
+                      {post.title}
+                    </Link>
                     <span>조회수 {post.viewCount}</span>
                   </li>
                 ))}

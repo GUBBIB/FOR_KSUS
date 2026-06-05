@@ -12,11 +12,17 @@ function EngineeringMapPage() {
             <p className="map-badge">CAMPUS MAP</p>
           </div>
 
-          <img
-            src="/images/engineering-map.png"
-            alt="공대 캠퍼스 맵"
-            className="engineering-map-image"
-          />
+          <a
+            href="/images/engineering-map2.png"
+            target="_blank"
+            rel="noreferrer"
+          >
+            <img
+              src="/images/engineering-map2.png"
+              alt="공대 캠퍼스 맵"
+              className="engineering-map-image"
+            />
+          </a>
         </section>
       </main>
     </div>

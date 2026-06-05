@@ -44,8 +44,10 @@
 
 .engineering-map-image {
   width: 100%;
-  max-height: 1200px;
-  object-fit: contain;
+  height: auto;
+  display: block;
+  border: 1px solid #e5e7eb;
   border-radius: 16px;
-  background: #f8fafc;
+  background: #ffffff;
+  cursor: zoom-in;
 }
