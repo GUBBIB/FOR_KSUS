@@ -7,7 +7,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://forksus.duckdns.org",
+        target: "https://forksus.duckdns.org",
         changeOrigin: true,
       },
     },

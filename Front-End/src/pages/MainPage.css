@@ -274,3 +274,23 @@
   color: #374151;
   font-weight: 700;
 }
+
+.main-bus-list {
+  display: grid;
+  gap: 18px;
+}
+
+.main-bus-item {
+  padding: 14px;
+  border-radius: 16px;
+  background: #f8fafc;
+}
+
+.main-bus-item .bus-route {
+  background: transparent;
+  padding: 0;
+}
+
+.main-bus-item .progress-line {
+  margin: 16px 0 10px;
+}

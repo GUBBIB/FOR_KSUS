@@ -1,9 +1,11 @@
 import { Link, useNavigate } from "react-router-dom";
+import { logout } from "../api/auth";
 import "./Header.css";
 
 type User = {
   email: string;
   nickname: string;
+  role?: string;
 };
 
 function Header() {
@@ -13,10 +15,16 @@ function Header() {
     localStorage.getItem("currentUser") || "null"
   );
 
-  const handleLogout = () => {
-    localStorage.removeItem("currentUser");
-    alert("로그아웃 되었습니다.");
-    navigate("/");
+  const handleLogout = async () => {
+    try {
+      await logout(); // (변경됨)
+    } catch (error) {
+      console.error(error);
+    } finally {
+      localStorage.removeItem("currentUser");
+      alert("로그아웃 되었습니다.");
+      navigate("/");
+    }
   };
 
   return (
@@ -29,6 +37,7 @@ function Header() {
         {currentUser ? (
           <>
             <Link to="/profile">{currentUser.nickname}님</Link>
+
             <button type="button" onClick={handleLogout}>
               로그아웃
             </button>

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "../components/Header";
 import "./PostWritePage.css";
@@ -38,6 +38,13 @@ function PostWritePage() {
   const currentUser: User | null = JSON.parse(
     localStorage.getItem("currentUser") || "null"
   );
+
+  useEffect(() => {
+    if (!currentUser) {
+      alert("로그인 후 이용해주세요.");
+      navigate("/login");
+    }
+  }, [currentUser, navigate]); // (변경됨)
 
   const posts: Post[] = JSON.parse(localStorage.getItem("posts") || "[]");
   const editPost = posts.find((post) => post.id === Number(editPostId));
@@ -113,6 +120,10 @@ function PostWritePage() {
     alert("게시글 작성 완료");
     navigate("/community");
   };
+
+  if (!currentUser) {
+    return null; // (변경됨)
+  }
 
   return (
     <div className="write-page">
