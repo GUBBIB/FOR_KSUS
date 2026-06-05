@@ -31,30 +31,16 @@ type Timetable = {
 type TimetableMap = Record<number, Timetable[]>;
 
 const days = [
-  { value: 0, label: "월요일" },
-  { value: 1, label: "화요일" },
-  { value: 2, label: "수요일" },
-  { value: 3, label: "목요일" },
-  { value: 4, label: "금요일" },
+  { value: 1, label: "월요일" },
+  { value: 2, label: "화요일" },
+  { value: 3, label: "수요일" },
+  { value: 4, label: "목요일" },
+  { value: 5, label: "금요일" },
 ];
 
-const TIME_MAP: Record<number, string> = {
-  108: "09:00",
-  120: "10:00",
-  132: "11:00",
-  144: "12:00",
-  156: "13:00",
-  168: "14:00",
-  180: "15:00",
-  192: "16:00",
-  204: "17:00",
-  216: "18:00",
-  228: "19:00",
-  240: "20:00",
-};
-
 const formatTime = (time: number) => {
-  return TIME_MAP[time] ?? String(time);
+  const timeString = time.toString().padStart(4, "0");
+  return `${timeString.slice(0, 2)}:${timeString.slice(2, 4)}`;
 };
 
 function ClassroomPage() {
