@@ -13,16 +13,30 @@ type Timetable = {
 };
 
 const dayLabels: Record<number, string> = {
-  1: "월요일",
-  2: "화요일",
-  3: "수요일",
-  4: "목요일",
-  5: "금요일",
+  0: "월요일",
+  1: "화요일",
+  2: "수요일",
+  3: "목요일",
+  4: "금요일",
+};
+
+const TIME_MAP: Record<number, string> = {
+  108: "09:00",
+  120: "10:00",
+  132: "11:00",
+  144: "12:00",
+  156: "13:00",
+  168: "14:00",
+  180: "15:00",
+  192: "16:00",
+  204: "17:00",
+  216: "18:00",
+  228: "19:00",
+  240: "20:00",
 };
 
 const formatTime = (time: number) => {
-  const timeString = time.toString().padStart(4, "0");
-  return `${timeString.slice(0, 2)}:${timeString.slice(2, 4)}`;
+  return TIME_MAP[time] ?? String(time);
 };
 
 function ClassroomDetailPage() {
@@ -62,11 +76,11 @@ function ClassroomDetailPage() {
 
   const timetableByDay = useMemo(() => {
     const result: Record<number, Timetable[]> = {
+      0: [],
       1: [],
       2: [],
       3: [],
       4: [],
-      5: [],
     };
 
     timetable.forEach((lecture) => {
