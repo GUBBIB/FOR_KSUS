@@ -34,4 +34,6 @@ public interface PostRepository extends JpaRepository<Post, Long> {
     """)
     List<UserMyPostDTO> findMyPostByUserId(Long userId);
 
+    List<Post> findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(Long userId);
+    long countByUserIdAndIsDeletedFalse(Long userId);
 }

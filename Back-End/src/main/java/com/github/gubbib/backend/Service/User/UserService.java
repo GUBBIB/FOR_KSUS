@@ -1,5 +1,7 @@
 package com.github.gubbib.backend.Service.User;
 
+import com.github.gubbib.backend.DTO.Comment.CommentResponseDTO;
+import com.github.gubbib.backend.DTO.Post.PostResponseDTO;
 import com.github.gubbib.backend.DTO.User.*;
 import com.github.gubbib.backend.Domain.User.User;
 import com.github.gubbib.backend.Domain.User.UserRole;
@@ -19,4 +21,10 @@ public interface UserService {
 
     void modifyNickname(@AuthenticationPrincipal CustomUserPrincipal userPrincipal, ModifyUserNicknameDTO modifyNickname);
     void modifyPassword(@AuthenticationPrincipal CustomUserPrincipal userPrincipal, ModifyUserPasswordDTO modifyUserPasswordDTO);
+
+    List<PostResponseDTO> getMyPosts(CustomUserPrincipal userPrincipal);
+    List<CommentResponseDTO> getMyComments(CustomUserPrincipal userPrincipal);
+
+    Long getMyPostsCount(CustomUserPrincipal userPrincipal);
+    Long getMyCommentsCount(CustomUserPrincipal userPrincipal);
 }

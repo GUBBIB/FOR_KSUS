@@ -1,5 +1,7 @@
 package com.github.gubbib.backend.Service.User;
 
+import com.github.gubbib.backend.DTO.Comment.CommentResponseDTO;
+import com.github.gubbib.backend.DTO.Post.PostResponseDTO;
 import com.github.gubbib.backend.DTO.User.*;
 import com.github.gubbib.backend.Domain.User.User;
 import com.github.gubbib.backend.Domain.User.UserRole;
@@ -112,5 +114,61 @@ public class UserServiceImp implements UserService {
 
         user.changePassword(passwordEncoder.encode(modifyUserPasswordDTO.modifyPassword()));
         userRepository.save(user);
+    }
+
+    @Override
+    public List<PostResponseDTO> getMyPosts(
+            CustomUserPrincipal userPrincipal
+    ) {
+
+        User user = checkUser(userPrincipal);
+
+        return postRepository
+                .findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(
+                        user.getId()
+                )
+                .stream()
+                .map(PostResponseDTO::from)
+                .toList();
+    }
+
+    @Override
+    public List<CommentResponseDTO> getMyComments(
+            CustomUserPrincipal userPrincipal
+    ) {
+
+        User user = checkUser(userPrincipal);
+
+        return commentRepository
+                .findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(
+                        user.getId()
+                )
+                .stream()
+                .map(CommentResponseDTO::from)
+                .toList();
+    }
+
+    @Override
+    public Long getMyPostsCount(
+            CustomUserPrincipal userPrincipal
+    ) {
+
+        User user = checkUser(userPrincipal);
+
+        return postRepository.countByUserIdAndIsDeletedFalse(
+                user.getId()
+        );
+    }
+
+    @Override
+    public Long getMyCommentsCount(
+            CustomUserPrincipal userPrincipal
+    ) {
+
+        User user = checkUser(userPrincipal);
+
+        return commentRepository.countByUserIdAndIsDeletedFalse(
+                user.getId()
+        );
     }
 }
