@@ -1,22 +1,67 @@
-import axiosInstance from "./axiosInstance";
+const API_BASE = "/api/v1/boards";
 
-export const getComments = (boardId, postId) => {
-  return axiosInstance.get(`/boards/${boardId}/posts/${postId}/comments/`);
+const handleResponse = async (response) => {
+  if (response.status === 204) {
+    return null;
+  }
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || "요청 실패");
+  }
+
+  return data;
 };
 
-export const createComment = (boardId, postId, data) => {
-  return axiosInstance.post(`/boards/${boardId}/posts/${postId}/comments/`, data);
-};
-
-export const updateComment = (boardId, postId, commentId, data) => {
-  return axiosInstance.put(
-    `/boards/${boardId}/posts/${postId}/comments/${commentId}`,
-    data
+export const getComments = async (boardId, postId) => {
+  const response = await fetch(
+    `${API_BASE}/${boardId}/posts/${postId}/comments/`,
+    {
+      method: "GET",
+      credentials: "include",
+    }
   );
+
+  return handleResponse(response);
 };
 
-export const deleteComment = (boardId, postId, commentId) => {
-  return axiosInstance.delete(
-    `/boards/${boardId}/posts/${postId}/comments/${commentId}`
+export const createComment = async (boardId, postId, data) => {
+  const response = await fetch(
+    `${API_BASE}/${boardId}/posts/${postId}/comments/`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(data),
+    }
   );
+
+  return handleResponse(response);
+};
+
+export const updateComment = async (boardId, postId, commentId, data) => {
+  const response = await fetch(
+    `${API_BASE}/${boardId}/posts/${postId}/comments/${commentId}`,
+    {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(data),
+    }
+  );
+
+  return handleResponse(response);
+};
+
+export const deleteComment = async (boardId, postId, commentId) => {
+  const response = await fetch(
+    `${API_BASE}/${boardId}/posts/${postId}/comments/${commentId}`,
+    {
+      method: "DELETE",
+      credentials: "include",
+    }
+  );
+
+  return handleResponse(response);
 };

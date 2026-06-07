@@ -1,6 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
+import { deletePost, getPostDetail } from "../api/boardApi";
+import {
+  createComment,
+  deleteComment,
+  getComments,
+  updateComment,
+} from "../api/commentApi";
 import "./PostDetailPage.css";
 
 type User = {
@@ -13,17 +20,14 @@ type Post = {
   title: string;
   content: string;
   writer: string;
-  writerEmail: string;
   viewCount: number;
   createdAt: string;
 };
 
 type Comment = {
   id: number;
-  postId: number;
   content: string;
   writer: string;
-  writerEmail: string;
   createdAt: string;
 };
 
@@ -37,6 +41,8 @@ type Reply = {
   createdAt: string;
 };
 
+const BOARD_ID = 1;
+
 function PostDetailPage() {
   const navigate = useNavigate();
   const { postId } = useParams();
@@ -45,20 +51,16 @@ function PostDetailPage() {
     localStorage.getItem("currentUser") || "null"
   );
 
-  const [posts, setPosts] = useState<Post[]>(
-    JSON.parse(localStorage.getItem("posts") || "[]")
-  );
-
-  const [comments, setComments] = useState<Comment[]>(
-    JSON.parse(localStorage.getItem("comments") || "[]")
-  );
-
+  const [post, setPost] = useState<Post | null>(null);
+  const [comments, setComments] = useState<Comment[]>([]);
   const [replies, setReplies] = useState<Reply[]>(
     JSON.parse(localStorage.getItem("replies") || "[]")
   );
 
-  const [commentContent, setCommentContent] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
+  const [commentContent, setCommentContent] = useState("");
   const [editingCommentId, setEditingCommentId] = useState<number | null>(null);
   const [editingContent, setEditingContent] = useState("");
 
@@ -70,58 +72,44 @@ function PostDetailPage() {
   const [editingReplyId, setEditingReplyId] = useState<number | null>(null);
   const [editingReplyContent, setEditingReplyContent] = useState("");
 
-  useEffect(() => {
+  const fetchPostAndComments = async () => {
     if (!postId) return;
 
-    const viewedPosts: number[] = JSON.parse(
-      localStorage.getItem("viewedPosts") || "[]"
-    );
+    try {
+      setIsLoading(true);
+      setErrorMessage("");
 
-    if (viewedPosts.includes(Number(postId))) {
-      return;
+      const [postData, commentData] = await Promise.all([
+        getPostDetail(BOARD_ID, Number(postId)),
+        getComments(BOARD_ID, Number(postId)),
+      ]);
+
+      setPost(postData);
+      setComments(Array.isArray(commentData) ? commentData : [commentData]);
+    } catch (error) {
+      console.error(error);
+      setErrorMessage(
+        error instanceof Error ? error.message : "게시글 정보를 불러오지 못했습니다."
+      );
+    } finally {
+      setIsLoading(false);
     }
+  };
 
-    const savedPosts: Post[] = JSON.parse(localStorage.getItem("posts") || "[]");
-
-    const updatedPosts = savedPosts.map((item) =>
-      item.id === Number(postId)
-        ? {
-            ...item,
-            viewCount: item.viewCount + 1,
-          }
-        : item
-    );
-
-    localStorage.setItem("posts", JSON.stringify(updatedPosts));
-    localStorage.setItem(
-      "viewedPosts",
-      JSON.stringify([...viewedPosts, Number(postId)])
-    );
-
-    setPosts(updatedPosts);
+  useEffect(() => {
+    fetchPostAndComments();
   }, [postId]);
 
-  const post = posts.find((item) => item.id === Number(postId));
-
   const postComments = useMemo(() => {
-    return comments
-      .filter((comment) => comment.postId === Number(postId))
-      .sort((a, b) => b.id - a.id);
-  }, [comments, postId]);
-
-  const isPostOwner = currentUser?.email === post?.writerEmail;
-
-  const saveComments = (nextComments: Comment[]) => {
-    setComments(nextComments);
-    localStorage.setItem("comments", JSON.stringify(nextComments));
-  };
+    return [...comments].sort((a, b) => b.id - a.id);
+  }, [comments]);
 
   const saveReplies = (nextReplies: Reply[]) => {
     setReplies(nextReplies);
     localStorage.setItem("replies", JSON.stringify(nextReplies));
   };
 
-  const handleCreateComment = (e: React.FormEvent) => {
+  const handleCreateComment = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!currentUser) {
@@ -135,65 +123,62 @@ function PostDetailPage() {
       return;
     }
 
-    const newComment: Comment = {
-      id: Date.now(),
-      postId: Number(postId),
-      content: commentContent,
-      writer: currentUser.nickname,
-      writerEmail: currentUser.email,
-      createdAt: "방금 전",
-    };
+    try {
+      await createComment(BOARD_ID, Number(postId), {
+        content: commentContent,
+      });
 
-    saveComments([...comments, newComment]);
-    setCommentContent("");
+      setCommentContent("");
+      await fetchPostAndComments();
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "댓글 작성 실패");
+    }
   };
 
   const handleStartEditComment = (comment: Comment) => {
-    if (!currentUser || currentUser.email !== comment.writerEmail) {
-      alert("본인이 작성한 댓글만 수정할 수 있습니다.");
-      return;
-    }
-
     setEditingCommentId(comment.id);
     setEditingContent(comment.content);
   };
 
-  const handleUpdateComment = (commentId: number) => {
+  const handleUpdateComment = async (commentId: number) => {
     if (!editingContent.trim()) {
       alert("댓글 내용을 입력해주세요.");
       return;
     }
 
-    const updatedComments = comments.map((comment) =>
-      comment.id === commentId
-        ? {
-            ...comment,
-            content: editingContent,
-          }
-        : comment
-    );
+    try {
+      await updateComment(BOARD_ID, Number(postId), commentId, {
+        content: editingContent,
+      });
 
-    saveComments(updatedComments);
-    setEditingCommentId(null);
-    setEditingContent("");
-    alert("댓글 수정 완료");
+      setEditingCommentId(null);
+      setEditingContent("");
+      await fetchPostAndComments();
+      alert("댓글 수정 완료");
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "댓글 수정 실패");
+    }
   };
 
-  const handleDeleteComment = (comment: Comment) => {
-    if (!currentUser || currentUser.email !== comment.writerEmail) {
-      alert("본인이 작성한 댓글만 삭제할 수 있습니다.");
-      return;
-    }
-
+  const handleDeleteComment = async (commentId: number) => {
     if (!window.confirm("댓글을 삭제하시겠습니까?")) return;
 
-    const updatedComments = comments.filter((item) => item.id !== comment.id);
-    const updatedReplies = replies.filter(
-      (reply) => reply.commentId !== comment.id
-    );
+    try {
+      await deleteComment(BOARD_ID, Number(postId), commentId);
 
-    saveComments(updatedComments);
-    saveReplies(updatedReplies);
+      const updatedReplies = replies.filter(
+        (reply) => reply.commentId !== commentId
+      );
+
+      saveReplies(updatedReplies);
+      await fetchPostAndComments();
+      alert("댓글 삭제 완료");
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "댓글 삭제 실패");
+    }
   };
 
   const handleCreateReply = (commentId: number) => {
@@ -266,8 +251,8 @@ function PostDetailPage() {
     saveReplies(updatedReplies);
   };
 
-  const handleDeletePost = () => {
-    if (!post) return;
+  const handleDeletePost = async () => {
+    if (!postId) return;
 
     if (!currentUser) {
       alert("로그인 후 이용해주세요.");
@@ -275,36 +260,40 @@ function PostDetailPage() {
       return;
     }
 
-    if (!isPostOwner) {
-      alert("본인이 작성한 게시글만 삭제할 수 있습니다.");
-      return;
-    }
-
     if (!window.confirm("게시글을 삭제하시겠습니까?")) return;
 
-    const updatedPosts = posts.filter((item) => item.id !== post.id);
-    const updatedComments = comments.filter(
-      (comment) => comment.postId !== post.id
-    );
-    const updatedReplies = replies.filter((reply) => reply.postId !== post.id);
-
-    localStorage.setItem("posts", JSON.stringify(updatedPosts));
-    saveComments(updatedComments);
-    saveReplies(updatedReplies);
-    setPosts(updatedPosts);
-
-    alert("게시글 삭제 완료");
-    navigate("/community");
+    try {
+      await deletePost(BOARD_ID, Number(postId));
+      alert("게시글 삭제 완료");
+      navigate("/community");
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "게시글 삭제 실패");
+    }
   };
 
-  if (!post) {
+  if (isLoading) {
     return (
       <div className="post-detail-page">
         <Header />
-
         <main className="post-detail-container">
           <section className="post-card">
-            <p className="empty-text">게시글을 찾을 수 없습니다.</p>
+            <p className="empty-text">불러오는 중...</p>
+          </section>
+        </main>
+      </div>
+    );
+  }
+
+  if (errorMessage || !post) {
+    return (
+      <div className="post-detail-page">
+        <Header />
+        <main className="post-detail-container">
+          <section className="post-card">
+            <p className="empty-text">
+              {errorMessage || "게시글을 찾을 수 없습니다."}
+            </p>
             <button className="basic-button" onClick={() => navigate("/community")}>
               목록으로
             </button>
@@ -337,7 +326,7 @@ function PostDetailPage() {
               목록
             </button>
 
-            {isPostOwner && (
+            {currentUser && (
               <>
                 <button
                   className="basic-button"
@@ -375,7 +364,6 @@ function PostDetailPage() {
           ) : (
             <ul className="comment-list">
               {postComments.map((comment) => {
-                const isCommentOwner = currentUser?.email === comment.writerEmail;
                 const commentReplies = replies
                   .filter((reply) => reply.commentId === comment.id)
                   .sort((a, b) => a.id - b.id);
@@ -432,7 +420,7 @@ function PostDetailPage() {
                           답글
                         </button>
 
-                        {isCommentOwner && (
+                        {currentUser && (
                           <>
                             <button
                               type="button"
@@ -443,7 +431,7 @@ function PostDetailPage() {
 
                             <button
                               type="button"
-                              onClick={() => handleDeleteComment(comment)}
+                              onClick={() => handleDeleteComment(comment.id)}
                             >
                               삭제
                             </button>

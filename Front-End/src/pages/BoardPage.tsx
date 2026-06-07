@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import { getPosts } from "../api/boardApi";
 import "./BoardPage.css";
 
 type User = {
@@ -14,13 +15,13 @@ type Post = {
   title: string;
   content: string;
   writer: string;
-  writerEmail: string;
   viewCount: number;
   createdAt: string;
 };
 
 type SortType = "latest" | "views";
 
+const BOARD_ID = 1;
 const POSTS_PER_PAGE = 10;
 
 function BoardPage() {
@@ -28,15 +29,37 @@ function BoardPage() {
 
   const currentUser: User | null = JSON.parse(
     localStorage.getItem("currentUser") || "null"
-  ); // (변경됨)
+  );
 
-  const [posts] = useState<Post[]>(() => {
-    return JSON.parse(localStorage.getItem("posts") || "[]");
-  });
-
+  const [posts, setPosts] = useState<Post[]>([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [sortType, setSortType] = useState<SortType>("latest");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
+
+        const data = await getPosts(BOARD_ID);
+        const postList: Post[] = Array.isArray(data) ? data : [data];
+
+        setPosts(postList);
+      } catch (error) {
+        console.error(error);
+        setErrorMessage(
+          error instanceof Error ? error.message : "게시글 목록 조회 실패"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPosts();
+  }, []);
 
   const filteredAndSortedPosts = useMemo(() => {
     const keyword = searchKeyword.trim().toLowerCase();
@@ -90,7 +113,7 @@ function BoardPage() {
     }
 
     navigate("/community/write");
-  }; // (변경됨)
+  };
 
   return (
     <div className="board-page">
@@ -104,11 +127,7 @@ function BoardPage() {
             <p>경성대 학생들과 자유롭게 이야기를 나눠보세요.</p>
           </div>
 
-          <button
-            type="button"
-            className="write-button"
-            onClick={handleWriteClick}
-          >
+          <button type="button" className="write-button" onClick={handleWriteClick}>
             글쓰기
           </button>
         </section>
@@ -143,7 +162,11 @@ function BoardPage() {
         </section>
 
         <section className="post-list-card">
-          {paginatedPosts.length === 0 ? (
+          {isLoading ? (
+            <p className="empty-text">게시글 불러오는 중...</p>
+          ) : errorMessage ? (
+            <p className="empty-text">{errorMessage}</p>
+          ) : paginatedPosts.length === 0 ? (
             <p className="empty-text">게시글이 없습니다.</p>
           ) : (
             <ul className="post-list">
