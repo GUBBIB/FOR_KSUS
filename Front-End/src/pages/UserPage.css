@@ -173,3 +173,7 @@
     grid-template-columns: 1fr;
   }
 }
+
+.stat-list.two-columns {
+  grid-template-columns: repeat(2, 1fr);
+}

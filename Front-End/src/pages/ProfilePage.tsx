@@ -1,60 +1,72 @@
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import {
+  getMyCommentsCount,
+  getMyPostsCount,
+  getMyProfile,
+} from "../api/userApi";
 import "./UserPage.css";
 
-type User = {
+type UserProfile = {
   email: string;
   nickname: string;
-};
-
-type Post = {
-  id: number;
-  writerEmail: string;
-};
-
-type Comment = {
-  id: number;
-  writerEmail: string;
-};
-
-type Reply = {
-  id: number;
-  writerEmail: string;
+  name: string;
 };
 
 function ProfilePage() {
   const navigate = useNavigate();
 
-  const currentUser: User | null = JSON.parse(
-    localStorage.getItem("currentUser") || "null"
-  );
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [postCount, setPostCount] = useState(0);
+  const [commentCount, setCommentCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(false);
 
-  const posts: Post[] = JSON.parse(localStorage.getItem("posts") || "[]");
-  const comments: Comment[] = JSON.parse(localStorage.getItem("comments") || "[]");
-  const replies: Reply[] = JSON.parse(localStorage.getItem("replies") || "[]");
+  useEffect(() => {
+    const fetchMyPageInfo = async () => {
+      try {
+        setIsLoading(true);
 
-  if (!currentUser) {
+        const [profileData, postsCountData, commentsCountData] =
+          await Promise.all([
+            getMyProfile(),
+            getMyPostsCount(),
+            getMyCommentsCount(),
+          ]);
+
+        setProfile(profileData);
+        setPostCount(postsCountData);
+        setCommentCount(commentsCountData);
+      } catch (error) {
+        console.error(error);
+        alert("로그인 후 프로필을 확인할 수 있습니다.");
+        navigate("/login");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchMyPageInfo();
+  }, [navigate]);
+
+  if (isLoading) {
     return (
       <div className="user-page">
         <Header />
+
         <main className="user-container">
           <section className="user-hero-card">
             <h1>프로필</h1>
-            <p>로그인 후 프로필을 확인할 수 있습니다.</p>
-            <button onClick={() => navigate("/login")}>로그인하러 가기</button>
+            <p>프로필 정보를 불러오는 중...</p>
           </section>
         </main>
       </div>
     );
   }
 
-  const myPosts = posts.filter((post) => post.writerEmail === currentUser.email);
-  const myComments = comments.filter(
-    (comment) => comment.writerEmail === currentUser.email
-  );
-  const myReplies = replies.filter(
-    (reply) => reply.writerEmail === currentUser.email
-  );
+  if (!profile) {
+    return null;
+  }
 
   return (
     <div className="user-page">
@@ -63,28 +75,24 @@ function ProfilePage() {
       <main className="user-container">
         <section className="user-hero-card">
           <p className="user-badge">MY PROFILE</p>
-          <h1>{currentUser.nickname}님</h1>
-          <p>{currentUser.email}</p>
+          <h1>{profile.nickname}님</h1>
+          <p>{profile.email}</p>
+          <p>이름: {profile.name}</p>
         </section>
 
         <section className="user-grid">
           <article className="user-card">
             <h2>내 활동 요약</h2>
 
-            <div className="stat-list">
+            <div className="stat-list two-columns">
               <div>
-                <strong>{myPosts.length}</strong>
+                <strong>{postCount}</strong>
                 <span>작성한 글</span>
               </div>
 
               <div>
-                <strong>{myComments.length}</strong>
+                <strong>{commentCount}</strong>
                 <span>작성한 댓글</span>
-              </div>
-
-              <div>
-                <strong>{myReplies.length}</strong>
-                <span>작성한 대댓글</span>
               </div>
             </div>
           </article>

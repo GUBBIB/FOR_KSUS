@@ -1,96 +1,38 @@
 import { useEffect, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
-import { getPosts } from "../api/boardApi";
-import { getComments } from "../api/commentApi";
+import { getMyComments } from "../api/userApi";
 import "./UserPage.css";
-
-type User = {
-  email: string;
-  nickname: string;
-};
-
-type Post = {
-  id: number;
-  title: string;
-};
 
 type Comment = {
   id: number;
-  postId: number;
   content: string;
   writer: string;
   createdAt: string;
 };
 
-const BOARD_ID = 1;
-
 function MyCommentsPage() {
-  const navigate = useNavigate();
-
-  const currentUser: User | null = JSON.parse(
-    localStorage.getItem("currentUser") || "null"
-  );
-
   const [myComments, setMyComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!currentUser) return;
-
     const fetchMyComments = async () => {
       try {
         setIsLoading(true);
 
-        const postData = await getPosts(BOARD_ID);
-        const posts: Post[] = Array.isArray(postData) ? postData : [postData];
+        const data = await getMyComments();
+        const commentList: Comment[] = Array.isArray(data) ? data : [data];
 
-        const commentGroups = await Promise.all(
-          posts.map(async (post) => {
-            const commentData = await getComments(BOARD_ID, post.id);
-            const comments = Array.isArray(commentData)
-              ? commentData
-              : [commentData];
-
-            return comments.map((comment) => ({
-              ...comment,
-              postId: post.id,
-            }));
-          })
-        );
-
-        const allComments = commentGroups.flat();
-
-        const filtered = allComments
-          .filter((comment) => comment.writer === currentUser.nickname)
-          .sort((a, b) => b.id - a.id);
-
-        setMyComments(filtered);
+        setMyComments(commentList);
       } catch (error) {
         console.error(error);
-        alert("내 댓글 조회 실패");
+        alert("로그인 후 내가 쓴 댓글을 확인할 수 있습니다.");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchMyComments();
-  }, [currentUser]);
-
-  if (!currentUser) {
-    return (
-      <div className="user-page">
-        <Header />
-        <main className="user-container">
-          <section className="user-hero-card">
-            <h1>내 댓글</h1>
-            <p>로그인 후 내가 쓴 댓글을 확인할 수 있습니다.</p>
-            <button onClick={() => navigate("/login")}>로그인하러 가기</button>
-          </section>
-        </main>
-      </div>
-    );
-  }
+  }, []);
 
   return (
     <div className="user-page">
@@ -118,10 +60,7 @@ function MyCommentsPage() {
                   <span>{comment.content}</span>
 
                   <div>
-                    <small>{comment.createdAt}</small>{" "}
-                    <Link to={`/community/posts/${comment.postId}`}>
-                      원문 보기
-                    </Link>
+                    <small>{comment.createdAt}</small>
                   </div>
                 </li>
               ))}
