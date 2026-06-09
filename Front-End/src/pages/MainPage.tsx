@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import { getBusStops, getNextBus } from "../api/busApi";
+import { getPosts } from "../api/boardApi";
 import {
   getBuildings,
   getClassrooms,
@@ -18,8 +19,10 @@ type Notice = {
 type Post = {
   id: number;
   title: string;
+  content: string;
   writer: string;
   viewCount: number;
+  createdAt: string;
 };
 
 type BusStop = {
@@ -64,6 +67,8 @@ type EmptyClassroom = {
   fullName: string;
 };
 
+const BOARD_ID = 1;
+
 const getTodayNumber = () => {
   const day = new Date().getDay();
 
@@ -88,7 +93,10 @@ const getBusProgress = (remainingMinutes: number) => {
 
 function MainPage() {
   const notices: Notice[] = JSON.parse(localStorage.getItem("notices") || "[]");
-  const posts: Post[] = JSON.parse(localStorage.getItem("posts") || "[]");
+
+  const [popularPosts, setPopularPosts] = useState<Post[]>([]);
+  const [isPopularPostLoading, setIsPopularPostLoading] = useState(false);
+  const [popularPostError, setPopularPostError] = useState("");
 
   const [busInfos, setBusInfos] = useState<BusInfo[]>([]);
   const [busError, setBusError] = useState("");
@@ -100,9 +108,35 @@ function MainPage() {
 
   const latestNotices = notices.slice(0, 3);
 
-  const popularPosts = [...posts]
-    .sort((a, b) => b.viewCount - a.viewCount)
-    .slice(0, 3);
+  useEffect(() => {
+    const fetchPopularPosts = async () => {
+      try {
+        setIsPopularPostLoading(true);
+        setPopularPostError("");
+
+        const data = await getPosts(BOARD_ID);
+        const postList: Post[] = Array.isArray(data) ? data : [data];
+
+        const topThreePosts = [...postList]
+          .sort((a, b) => b.viewCount - a.viewCount)
+          .slice(0, 3);
+
+        setPopularPosts(topThreePosts);
+      } catch (error) {
+        console.error(error);
+
+        if (error instanceof Error) {
+          setPopularPostError(error.message);
+        } else {
+          setPopularPostError("인기 게시글을 불러오지 못했습니다.");
+        }
+      } finally {
+        setIsPopularPostLoading(false);
+      }
+    };
+
+    fetchPopularPosts();
+  }, []);
 
   useEffect(() => {
     const fetchBusInfo = async () => {
@@ -244,12 +278,10 @@ function MainPage() {
       <main className="main-container">
         <section className="map-hero-card">
           <div className="map-hero-text">
-            <p className="hero-badge">경성대학교 공대 학생들을 위한 사이트</p>  
-            <h1>공대 생활, 이젠 편리하게!</h1>
-            <p>
-              공대 캠퍼스 맵, 셔틀버스 정보, 빈 강의실 찾기 등 다양한 기능을
-              제공합니다.
-            </p>
+            <p className="hero-badge">
+           경성대학교 학생들을 위한 사이트</p> 
+           <h1>학교 생활, 이젠 편리하게!</h1>
+            <p> 경성대 캠퍼스 맵, 셔틀버스 정보, 빈 강의실 찾기 등 다양한 기능을 제공합니다. </p>
           </div>
 
           <Link to="/engineering-map" className="map-preview">
@@ -261,7 +293,7 @@ function MainPage() {
           <article className="dashboard-card bus-card">
             <div className="card-header">
               <h2>셔틀버스 정보</h2>
-              <Link to="/bus">더보기</Link>
+              <Link to="/bus">상세보기</Link>
             </div>
 
             {isBusLoading ? (
@@ -317,8 +349,8 @@ function MainPage() {
 
           <article className="dashboard-card classroom-card">
             <div className="card-header">
-              <h2>빈 강의실 찾기</h2>
-              <Link to="/classrooms">더보기</Link>
+              <h2> 빈 강의실 찾기</h2>
+              <Link to="/classrooms">조회하기</Link>
             </div>
 
             {isClassroomLoading ? (
@@ -345,7 +377,7 @@ function MainPage() {
 
           <article className="dashboard-card notice-card">
             <div className="card-header">
-              <h2>공지사항</h2>
+              <h2> 최신 공지사항</h2>
               <Link to="/notices">더보기</Link>
             </div>
 
@@ -365,19 +397,21 @@ function MainPage() {
 
           <article className="dashboard-card community-card">
             <div className="card-header">
-              <h2>인기 커뮤니티 글</h2>
+              <h2>커뮤니티</h2>
               <Link to="/community">더보기</Link>
             </div>
 
-            {popularPosts.length === 0 ? (
+            {isPopularPostLoading ? (
+              <p className="empty-text">인기 게시글 조회 중...</p>
+            ) : popularPostError ? (
+              <p className="empty-text">{popularPostError}</p>
+            ) : popularPosts.length === 0 ? (
               <p className="empty-text">아직 인기글이 없습니다.</p>
             ) : (
               <ul>
                 {popularPosts.map((post) => (
                   <li key={post.id}>
-                    <Link to={`/community/posts/${post.id}`}>
-                      {post.title}
-                    </Link>
+                    <Link to={`/community/posts/${post.id}`}>{post.title}</Link>
                     <span>조회수 {post.viewCount}</span>
                   </li>
                 ))}
