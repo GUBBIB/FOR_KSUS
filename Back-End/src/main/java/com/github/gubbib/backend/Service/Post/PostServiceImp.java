@@ -11,6 +11,7 @@ import com.github.gubbib.backend.Exception.GlobalException;
 import com.github.gubbib.backend.Principal.CustomUserPrincipal;
 import com.github.gubbib.backend.Repository.Post.PostRepository;
 import com.github.gubbib.backend.Service.Board.BoardService;
+import com.github.gubbib.backend.Service.Redis.ViewCounterService;
 import com.github.gubbib.backend.Service.User.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +29,9 @@ public class PostServiceImp implements PostService{
     private final BoardService boardService;
     private final PostRepository postRepository;
     private final UserService userService;
+    private final ViewCounterService viewCounterService;
+
+    private static final Long NOTICE_BOARD_ID = 2L;
 
     @Override
     public Post existsPost(Long boardId, Long postId) {
@@ -66,13 +70,22 @@ public class PostServiceImp implements PostService{
     }
 
     @Override
-    public PostResponseDTO getPost(Long boardId, Long postId) {
+    public PostResponseDTO getPost(CustomUserPrincipal userPrincipal, Long boardId, Long postId) {
 
         Board b = boardService.existsBoard(boardId);
 
-        // 조회수 증가 로직 추가 필요
         Post p = postRepository.findByIdAndBoardIdAndIsDeletedFalse(postId, b.getId())
                 .orElseThrow(() -> new GlobalException(ErrorCode.POST_NOT_FOUND));
+
+        Long currentUserId = (userPrincipal != null) ? userPrincipal.getId() : null;
+
+        boolean isOwner = false;
+
+        if(currentUserId != null) {
+            isOwner = p.getUser().getId().equals(currentUserId);
+        }
+
+        if(!isOwner) viewCounterService.increasePostView(postId);
 
         return  PostResponseDTO.from(p);
     }
@@ -109,4 +122,61 @@ public class PostServiceImp implements PostService{
 
         p.changeIsDeleted();
     }
+
+    @Override
+    @Transactional
+    public PostResponseDTO createNoticePost(
+            PostCreateRequestDTO request,
+            CustomUserPrincipal userPrincipal
+    ) {
+
+        Board board = boardService.existsBoard(NOTICE_BOARD_ID);
+        User user = userService.checkUser(userPrincipal);
+
+        Post post = new Post(
+                request.title(),
+                request.content(),
+                user,
+                board
+        );
+
+        Post savedPost = postRepository.save(post);
+
+        return PostResponseDTO.from(savedPost);
+    }
+
+    @Override
+    @Transactional
+    public PostResponseDTO updateNoticePost(
+            Long postId,
+            PostUpdateRequestDTO request
+    ) {
+
+        Post post = existsPost(NOTICE_BOARD_ID, postId);
+
+        if (!post.getTitle().equals(request.title())
+                || !post.getContent().equals(request.content())) {
+
+            post.updatePost(
+                    request.title(),
+                    request.content()
+            );
+
+        } else {
+            throw new GlobalException(ErrorCode.POST_NO_CHANGES);
+        }
+
+        return PostResponseDTO.from(post);
+    }
+
+    @Override
+    @Transactional
+    public void deleteNoticePost(Long postId) {
+
+        Post post = existsPost(NOTICE_BOARD_ID, postId);
+
+        post.changeIsDeleted();
+    }
+
+
 }

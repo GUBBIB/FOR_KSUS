@@ -134,10 +134,11 @@ public class PostController {
     @GetMapping("/{postId}")
     public ResponseEntity<PostResponseDTO> getPost(
             @PathVariable Long boardId,
-            @PathVariable Long postId
+            @PathVariable Long postId,
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal
     ){
         return ResponseEntity.ok(
-                postService.getPost(boardId, postId)
+                postService.getPost(userPrincipal, boardId, postId)
         );
     }
 
