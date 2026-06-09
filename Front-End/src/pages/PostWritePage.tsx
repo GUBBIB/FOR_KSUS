@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "../components/Header";
+import { createPost, getPostDetail, updatePost } from "../api/boardApi";
 import "./PostWritePage.css";
 
 type User = {
@@ -13,20 +14,11 @@ type Post = {
   title: string;
   content: string;
   writer: string;
-  writerEmail: string;
   viewCount: number;
   createdAt: string;
 };
 
-const getTodayDate = () => {
-  const now = new Date();
-
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
-};
+const BOARD_ID = 1;
 
 function PostWritePage() {
   const navigate = useNavigate();
@@ -39,20 +31,44 @@ function PostWritePage() {
     localStorage.getItem("currentUser") || "null"
   );
 
+  const [form, setForm] = useState({
+    title: "",
+    content: "",
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
+
   useEffect(() => {
     if (!currentUser) {
       alert("로그인 후 이용해주세요.");
       navigate("/login");
     }
-  }, [currentUser, navigate]); // (변경됨)
+  }, [currentUser, navigate]);
 
-  const posts: Post[] = JSON.parse(localStorage.getItem("posts") || "[]");
-  const editPost = posts.find((post) => post.id === Number(editPostId));
+  useEffect(() => {
+    const fetchEditPost = async () => {
+      if (!editPostId) return;
 
-  const [form, setForm] = useState({
-    title: editPost?.title || "",
-    content: editPost?.content || "",
-  });
+      try {
+        setIsLoading(true);
+
+        const data: Post = await getPostDetail(BOARD_ID, Number(editPostId));
+
+        setForm({
+          title: data.title,
+          content: data.content,
+        });
+      } catch (error) {
+        console.error(error);
+        alert(error instanceof Error ? error.message : "게시글 조회 실패");
+        navigate("/community");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEditPost();
+  }, [editPostId, navigate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -63,7 +79,7 @@ function PostWritePage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!currentUser) {
@@ -77,52 +93,41 @@ function PostWritePage() {
       return;
     }
 
-    if (isEditMode) {
-      if (!editPost) {
-        alert("수정할 게시글을 찾을 수 없습니다.");
-        navigate("/community");
+    try {
+      setIsLoading(true);
+
+      if (isEditMode && editPostId) {
+        const updatedPost: Post = await updatePost(
+          BOARD_ID,
+          Number(editPostId),
+          {
+            title: form.title,
+            content: form.content,
+          }
+        );
+
+        alert("게시글 수정 완료");
+        navigate(`/community/posts/${updatedPost.id}`);
         return;
       }
 
-      if (editPost.writerEmail !== currentUser.email) {
-        alert("본인이 작성한 게시글만 수정할 수 있습니다.");
-        navigate("/community");
-        return;
-      }
+      await createPost(BOARD_ID, {
+        title: form.title,
+        content: form.content,
+      });
 
-      const updatedPosts = posts.map((post) =>
-        post.id === editPost.id
-          ? {
-              ...post,
-              title: form.title,
-              content: form.content,
-            }
-          : post
-      );
-
-      localStorage.setItem("posts", JSON.stringify(updatedPosts));
-      alert("게시글 수정 완료");
-      navigate(`/community/posts/${editPost.id}`);
-      return;
+      alert("게시글 작성 완료");
+      navigate("/community");
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "요청 실패");
+    } finally {
+      setIsLoading(false);
     }
-
-    const newPost: Post = {
-      id: Date.now(),
-      title: form.title,
-      content: form.content,
-      writer: currentUser.nickname,
-      writerEmail: currentUser.email,
-      viewCount: 0,
-      createdAt: getTodayDate(),
-    };
-
-    localStorage.setItem("posts", JSON.stringify([newPost, ...posts]));
-    alert("게시글 작성 완료");
-    navigate("/community");
   };
 
   if (!currentUser) {
-    return null; // (변경됨)
+    return null;
   }
 
   return (
@@ -137,6 +142,7 @@ function PostWritePage() {
             placeholder="제목"
             value={form.title}
             onChange={handleChange}
+            disabled={isLoading}
           />
 
           <textarea
@@ -145,6 +151,7 @@ function PostWritePage() {
             placeholder="내용을 입력하세요."
             value={form.content}
             onChange={handleChange}
+            disabled={isLoading}
           />
 
           <div className="write-actions">
@@ -152,12 +159,13 @@ function PostWritePage() {
               type="button"
               className="cancel-button"
               onClick={() => navigate("/community")}
+              disabled={isLoading}
             >
               취소
             </button>
 
-            <button type="submit" className="save-button">
-              {isEditMode ? "수정 저장" : "저장"}
+            <button type="submit" className="save-button" disabled={isLoading}>
+              {isLoading ? "저장 중..." : isEditMode ? "수정 저장" : "저장"}
             </button>
           </div>
         </form>

@@ -1,25 +1,64 @@
-import axiosInstance from "./axiosInstance";
+const API_BASE = "/api/v1/boards";
 
-export const getBoards = () => {
-  return axiosInstance.get("/boards/");
+const handleResponse = async (response) => {
+  if (response.status === 204) {
+    return null;
+  }
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(data?.message || "요청 실패");
+  }
+
+  return data;
 };
 
-export const getPosts = (boardId) => {
-  return axiosInstance.get(`/boards/${boardId}/posts/`);
+export const getPosts = async (boardId) => {
+  const response = await fetch(`${API_BASE}/${boardId}/posts/`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  return handleResponse(response);
 };
 
-export const getPostDetail = (boardId, postId) => {
-  return axiosInstance.get(`/boards/${boardId}/posts/${postId}`);
+export const getPostDetail = async (boardId, postId) => {
+  const response = await fetch(`${API_BASE}/${boardId}/posts/${postId}`, {
+    method: "GET",
+    credentials: "include",
+  });
+
+  return handleResponse(response);
 };
 
-export const createPost = (boardId, data) => {
-  return axiosInstance.post(`/boards/${boardId}/posts/`, data);
+export const createPost = async (boardId, data) => {
+  const response = await fetch(`${API_BASE}/${boardId}/posts/`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  return handleResponse(response);
 };
 
-export const updatePost = (boardId, postId, data) => {
-  return axiosInstance.put(`/boards/${boardId}/posts/${postId}`, data);
+export const updatePost = async (boardId, postId, data) => {
+  const response = await fetch(`${API_BASE}/${boardId}/posts/${postId}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify(data),
+  });
+
+  return handleResponse(response);
 };
 
-export const deletePost = (boardId, postId) => {
-  return axiosInstance.delete(`/boards/${boardId}/posts/${postId}`);
+export const deletePost = async (boardId, postId) => {
+  const response = await fetch(`${API_BASE}/${boardId}/posts/${postId}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+
+  return handleResponse(response);
 };

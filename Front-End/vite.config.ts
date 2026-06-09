@@ -8,6 +8,7 @@ export default defineConfig({
     proxy: {
       "/api": {
         target: "https://forksus.duckdns.org",
+        // target: "http://localhost:8080",
         changeOrigin: true,
       },
     },
