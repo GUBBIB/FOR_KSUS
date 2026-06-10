@@ -37,4 +37,12 @@ public interface PostRepository extends JpaRepository<Post, Long> {
 
     List<Post> findByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(Long userId);
     long countByUserIdAndIsDeletedFalse(Long userId);
+
+    @Modifying(flushAutomatically = true, clearAutomatically = true)
+    @Query("""
+        UPDATE Post p 
+        SET p.viewCount = p.viewCount + :delta
+        WHERE p.id = :postId
+    """)
+    int addViewCount(Long postId, Long delta);
 }
