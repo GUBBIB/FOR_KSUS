@@ -1,8 +1,11 @@
 package com.github.gubbib.backend.Controller.User;
 
 
+import com.github.gubbib.backend.DTO.Comment.CommentResponseDTO;
 import com.github.gubbib.backend.DTO.Error.ErrorResponseDTO;
+import com.github.gubbib.backend.DTO.Post.PostResponseDTO;
 import com.github.gubbib.backend.DTO.User.*;
+import com.github.gubbib.backend.Domain.Community.Post.Post;
 import com.github.gubbib.backend.Principal.CustomUserPrincipal;
 import com.github.gubbib.backend.Service.User.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -221,6 +224,130 @@ public class UserController {
         return ResponseEntity.noContent().build();
     }
 
+    @Operation(
+            summary = "내 게시글 목록 조회",
+            description = "현재 로그인한 사용자가 작성한 게시글 목록을 조회합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "내 게시글 목록 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = PostResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증 필요",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @GetMapping("/my-posts")
+    public ResponseEntity<List<PostResponseDTO>> getMyPosts(
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal
+    ){
+        return ResponseEntity.ok(
+                userService.getMyPosts(userPrincipal)
+        );
+    }
 
+    @Operation(
+            summary = "내 댓글 목록 조회",
+            description = "현재 로그인한 사용자가 작성한 댓글 목록을 조회합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "내 댓글 목록 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = CommentResponseDTO.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증 필요",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @GetMapping("/my-comments")    public ResponseEntity<List<CommentResponseDTO>> getMyComments(
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal
+    ){
+
+        return ResponseEntity.ok(
+                userService.getMyComments(userPrincipal)
+        );
+    }
+
+    @Operation(
+            summary = "내 게시글 수 조회",
+            description = "현재 로그인한 사용자가 작성한 게시글 수를 조회합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "내 게시글 수 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Long.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증 필요",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @GetMapping("/my-posts/count")
+    public ResponseEntity<Long> getMyPostsCount(
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal
+    ){
+
+        return ResponseEntity.ok(
+                userService.getMyPostsCount(userPrincipal)
+        );
+    }
+
+    @Operation(
+            summary = "내 댓글 수 조회",
+            description = "현재 로그인한 사용자가 작성한 댓글 수를 조회합니다."
+    )
+    @ApiResponses(value = {
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "내 댓글 수 조회 성공",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = Long.class)
+                    )
+            ),
+            @ApiResponse(
+                    responseCode = "401",
+                    description = "인증 필요",
+                    content = @Content(
+                            mediaType = "application/json",
+                            schema = @Schema(implementation = ErrorResponseDTO.class)
+                    )
+            )
+    })
+    @GetMapping("/my-comments/count")
+    public ResponseEntity<Long> getMyCommentsCount(
+            @AuthenticationPrincipal CustomUserPrincipal userPrincipal
+    ){
+
+        return ResponseEntity.ok(
+                userService.getMyCommentsCount(userPrincipal)
+        );
+    }
 
 }

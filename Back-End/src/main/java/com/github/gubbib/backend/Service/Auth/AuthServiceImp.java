@@ -115,6 +115,8 @@ public class AuthServiceImp implements AuthService {
     public void sendVerificationMail(StudentVerifyRequestDTO dto) {
         if(!dto.email().matches("^[A-Za-z0-9._%+-]+@ks\\.ac\\.kr$")){
             throw new GlobalException(ErrorCode.AUTH_VERIFICATION_EMAIL_INVALID);
+        } else if(userRepository.existsByEmail(dto.email())){
+            throw new GlobalException(ErrorCode.AUTH_EMAIL_DUPLICATION);
         }
 
         String code = generateCode();

@@ -31,16 +31,43 @@ type Timetable = {
 type TimetableMap = Record<number, Timetable[]>;
 
 const days = [
-  { value: 1, label: "월요일" },
-  { value: 2, label: "화요일" },
-  { value: 3, label: "수요일" },
-  { value: 4, label: "목요일" },
-  { value: 5, label: "금요일" },
+  { value: 0, label: "월요일" },
+  { value: 1, label: "화요일" },
+  { value: 2, label: "수요일" },
+  { value: 3, label: "목요일" },
+  { value: 4, label: "금요일" },
+];
+
+const TIME_OPTIONS = [
+  { value: 108, label: "09:00" },
+  { value: 120, label: "10:00" },
+  { value: 132, label: "11:00" },
+  { value: 144, label: "12:00" },
+  { value: 156, label: "13:00" },
+  { value: 168, label: "14:00" },
+  { value: 180, label: "15:00" },
+  { value: 192, label: "16:00" },
+  { value: 204, label: "17:00" },
+  { value: 216, label: "18:00" },
+  { value: 228, label: "19:00" },
+  { value: 240, label: "20:00" },
 ];
 
 const formatTime = (time: number) => {
-  const timeString = time.toString().padStart(4, "0");
-  return `${timeString.slice(0, 2)}:${timeString.slice(2, 4)}`;
+  const option = TIME_OPTIONS.find((item) => item.value === time);
+  return option?.label ?? String(time);
+};
+
+const isLectureInSelectedTime = (
+  lecture: Timetable,
+  selectedDay: number,
+  selectedTimeCode: number
+) => {
+  return (
+    lecture.dayOfWeek === selectedDay &&
+    lecture.startTime <= selectedTimeCode &&
+    selectedTimeCode < lecture.endTime
+  );
 };
 
 function ClassroomPage() {
@@ -51,14 +78,12 @@ function ClassroomPage() {
   const [selectedBuildingId, setSelectedBuildingId] = useState<number | null>(
     null
   );
-  const [selectedDay, setSelectedDay] = useState<number>(1);
-  const [selectedTime, setSelectedTime] = useState<string>("09:00");
+  const [selectedDay, setSelectedDay] = useState<number>(0);
+  const [selectedTimeCode, setSelectedTimeCode] = useState<number>(108);
 
   const [isBuildingLoading, setIsBuildingLoading] = useState(false);
   const [isClassroomLoading, setIsClassroomLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-
-  const selectedTimeNumber = Number(selectedTime.replace(":", ""));
 
   useEffect(() => {
     const fetchBuildings = async () => {
@@ -66,11 +91,13 @@ function ClassroomPage() {
         setIsBuildingLoading(true);
         setErrorMessage("");
 
-        const data: Building[] = await getBuildings();
-        setBuildings(data);
+        const data = await getBuildings();
+        const buildingList: Building[] = Array.isArray(data) ? data : [data];
 
-        if (data.length > 0) {
-          setSelectedBuildingId(data[0].id);
+        setBuildings(buildingList);
+
+        if (buildingList.length > 0) {
+          setSelectedBuildingId(buildingList[0].id);
         }
       } catch (error) {
         console.error(error);
@@ -95,30 +122,37 @@ function ClassroomPage() {
         setClassrooms([]);
         setTimetableMap({});
 
-        const classroomData: Classroom[] = await getClassrooms(
-          selectedBuildingId
-        );
+        const classroomData = await getClassrooms(selectedBuildingId);
+        const classroomList: Classroom[] = Array.isArray(classroomData)
+          ? classroomData
+          : [classroomData];
 
-        setClassrooms(classroomData);
+        setClassrooms(classroomList);
 
-        const timetableResults = await Promise.all(
-          classroomData.map(async (classroom) => {
-            const timetable: Timetable[] = await getClassroomTimetable(
+        const results = await Promise.allSettled(
+          classroomList.map(async (classroom) => {
+            const timetableData = await getClassroomTimetable(
               selectedBuildingId,
               classroom.id
             );
 
+            const timetableList: Timetable[] = Array.isArray(timetableData)
+              ? timetableData
+              : [timetableData];
+
             return {
               classroomId: classroom.id,
-              timetable,
+              timetable: timetableList.filter(Boolean),
             };
           })
         );
 
         const nextTimetableMap: TimetableMap = {};
 
-        timetableResults.forEach((result) => {
-          nextTimetableMap[result.classroomId] = result.timetable;
+        results.forEach((result) => {
+          if (result.status === "fulfilled") {
+            nextTimetableMap[result.value.classroomId] = result.value.timetable;
+          }
         });
 
         setTimetableMap(nextTimetableMap);
@@ -139,42 +173,30 @@ function ClassroomPage() {
     return classrooms.filter((classroom) => {
       const timetable = timetableMap[classroom.id] || [];
 
-      const hasLectureNow = timetable.some((lecture) => {
-        return (
-          lecture.dayOfWeek === selectedDay &&
-          lecture.startTime <= selectedTimeNumber &&
-          selectedTimeNumber < lecture.endTime
-        );
-      });
+      const hasLectureNow = timetable.some((lecture) =>
+        isLectureInSelectedTime(lecture, selectedDay, selectedTimeCode)
+      );
 
       return !hasLectureNow;
     });
-  }, [classrooms, timetableMap, selectedDay, selectedTimeNumber]);
+  }, [classrooms, timetableMap, selectedDay, selectedTimeCode]);
 
   const occupiedClassrooms = useMemo(() => {
     return classrooms.filter((classroom) => {
       const timetable = timetableMap[classroom.id] || [];
 
-      return timetable.some((lecture) => {
-        return (
-          lecture.dayOfWeek === selectedDay &&
-          lecture.startTime <= selectedTimeNumber &&
-          selectedTimeNumber < lecture.endTime
-        );
-      });
+      return timetable.some((lecture) =>
+        isLectureInSelectedTime(lecture, selectedDay, selectedTimeCode)
+      );
     });
-  }, [classrooms, timetableMap, selectedDay, selectedTimeNumber]);
+  }, [classrooms, timetableMap, selectedDay, selectedTimeCode]);
 
   const getCurrentLecture = (classroomId: number) => {
     const timetable = timetableMap[classroomId] || [];
 
-    return timetable.find((lecture) => {
-      return (
-        lecture.dayOfWeek === selectedDay &&
-        lecture.startTime <= selectedTimeNumber &&
-        selectedTimeNumber < lecture.endTime
-      );
-    });
+    return timetable.find((lecture) =>
+      isLectureInSelectedTime(lecture, selectedDay, selectedTimeCode)
+    );
   };
 
   return (
@@ -185,6 +207,11 @@ function ClassroomPage() {
         <section className="classroom-hero">
           <div>
             <p className="classroom-badge">CLASSROOM</p>
+            <h1>빈 강의실 조회</h1>
+            <p>
+              건물과 시간을 선택하면 현재 강의가 없는 강의실만 확인할 수
+              있습니다.
+            </p>
           </div>
         </section>
 
@@ -227,11 +254,16 @@ function ClassroomPage() {
 
               <label>
                 <span>시간</span>
-                <input
-                  type="time"
-                  value={selectedTime}
-                  onChange={(e) => setSelectedTime(e.target.value)}
-                />
+                <select
+                  value={selectedTimeCode}
+                  onChange={(e) => setSelectedTimeCode(Number(e.target.value))}
+                >
+                  {TIME_OPTIONS.map((time) => (
+                    <option key={time.value} value={time.value}>
+                      {time.label}
+                    </option>
+                  ))}
+                </select>
               </label>
             </div>
           )}
@@ -261,7 +293,7 @@ function ClassroomPage() {
                     >
                       <div>
                         <strong>{classroom.fullName}</strong>
-                        <p>현재 강의 없음</p>
+                        <p>선택한 시간에 강의 없음</p>
                       </div>
 
                       <span>사용 가능</span>
@@ -293,7 +325,8 @@ function ClassroomPage() {
                         <div>
                           <strong>{classroom.fullName}</strong>
                           <p>
-                            {lecture?.lectureName} / {lecture?.professor}
+                            {lecture?.lectureName || "강의 중"} /{" "}
+                            {lecture?.professor || "교수 정보 없음"}
                           </p>
                         </div>
 
