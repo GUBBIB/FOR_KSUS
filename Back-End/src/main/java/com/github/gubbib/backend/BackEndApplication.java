@@ -9,6 +9,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 @SpringBootApplication
 @EnableJpaAuditing
 @EnableMethodSecurity
+@EnableScheduling
 public class BackEndApplication {
 
 	public static void main(String[] args) {
