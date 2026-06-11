@@ -1,6 +1,7 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
+import { getNotices } from "../api/noticeApi";
 import "./NoticePage.css";
 
 type User = {
@@ -14,35 +15,13 @@ type Notice = {
   title: string;
   content: string;
   writer: string;
-  writerEmail: string;
+  viewCount: number;
   createdAt: string;
 };
 
 type SortType = "latest" | "oldest";
 
-const ADMIN_EMAIL = "admin@ks.ac.kr";
 const NOTICES_PER_PAGE = 10;
-
-const defaultNotices: Notice[] = [
-  {
-    id: 1,
-    title: "[필독] FOR KSUS 이용 안내",
-    content:
-      "FOR KSUS는 경성대 학생들을 위한 커뮤니티 서비스입니다. 서로 존중하며 이용해주세요.",
-    writer: "관리자",
-    writerEmail: ADMIN_EMAIL,
-    createdAt: "2026-06-05",
-  },
-  {
-    id: 2,
-    title: "[공지] 커뮤니티 이용 규칙",
-    content:
-      "욕설, 비방, 도배성 게시글은 삭제될 수 있습니다. 건전한 커뮤니티 문화를 함께 만들어주세요.",
-    writer: "관리자",
-    writerEmail: ADMIN_EMAIL,
-    createdAt: "2026-06-05",
-  },
-];
 
 function NoticePage() {
   const navigate = useNavigate();
@@ -51,25 +30,40 @@ function NoticePage() {
     localStorage.getItem("currentUser") || "null"
   );
 
-  const isAdmin =
-    currentUser?.email === ADMIN_EMAIL || currentUser?.role === "ADMIN";
+  const isAdmin = currentUser?.role === "ADMIN";
 
-  const savedNotices = localStorage.getItem("notices");
-
-  if (!savedNotices) {
-    localStorage.setItem("notices", JSON.stringify(defaultNotices));
-  }
-
-  const notices: Notice[] = savedNotices
-    ? JSON.parse(savedNotices)
-    : defaultNotices;
-
+  const [notices, setNotices] = useState<Notice[]>([]);
   const [searchKeyword, setSearchKeyword] = useState("");
   const [sortType, setSortType] = useState<SortType>("latest");
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const fetchNotices = async () => {
+      try {
+        setIsLoading(true);
+        setErrorMessage("");
+
+        const data = await getNotices();
+        const noticeList: Notice[] = Array.isArray(data) ? data : [data];
+
+        setNotices(noticeList);
+      } catch (error) {
+        console.error(error);
+        setErrorMessage(
+          error instanceof Error ? error.message : "공지사항 조회 실패"
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchNotices();
+  }, []);
 
   const filteredAndSortedNotices = useMemo(() => {
-    const keyword = searchKeyword.toLowerCase();
+    const keyword = searchKeyword.trim().toLowerCase();
 
     const filtered = notices.filter((notice) => {
       return (
@@ -79,7 +73,7 @@ function NoticePage() {
       );
     });
 
-    return filtered.sort((a, b) => {
+    return [...filtered].sort((a, b) => {
       if (sortType === "oldest") {
         return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
       }
@@ -115,6 +109,8 @@ function NoticePage() {
         <section className="notice-hero">
           <div>
             <p className="notice-badge">NOTICE</p>
+            <h1>공지사항</h1>
+            <p>FOR KSUS의 중요한 안내와 업데이트를 확인하세요.</p>
           </div>
 
           {isAdmin && (
@@ -158,7 +154,11 @@ function NoticePage() {
         </section>
 
         <section className="notice-list-card">
-          {paginatedNotices.length === 0 ? (
+          {isLoading ? (
+            <p className="empty-text">공지사항 불러오는 중...</p>
+          ) : errorMessage ? (
+            <p className="empty-text">{errorMessage}</p>
+          ) : paginatedNotices.length === 0 ? (
             <p className="empty-text">공지사항이 없습니다.</p>
           ) : (
             <ul className="notice-list">
@@ -172,6 +172,7 @@ function NoticePage() {
 
                   <div className="notice-meta">
                     <span>{notice.writer}</span>
+                    <span>조회수 {notice.viewCount}</span>
                     <span>{notice.createdAt}</span>
                   </div>
                 </li>

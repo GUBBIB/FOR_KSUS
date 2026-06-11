@@ -1,6 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import Header from "../components/Header";
+import {
+  createNotice,
+  getNoticeDetail,
+  updateNotice,
+} from "../api/noticeApi";
 import "./NoticePage.css";
 
 type User = {
@@ -14,20 +19,8 @@ type Notice = {
   title: string;
   content: string;
   writer: string;
-  writerEmail: string;
+  viewCount: number;
   createdAt: string;
-};
-
-const ADMIN_EMAIL = "admin@ks.ac.kr";
-
-const getTodayDate = () => {
-  const now = new Date();
-
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-
-  return `${year}-${month}-${day}`;
 };
 
 function NoticeWritePage() {
@@ -41,17 +34,46 @@ function NoticeWritePage() {
     localStorage.getItem("currentUser") || "null"
   );
 
-  const isAdmin =
-    currentUser?.email === ADMIN_EMAIL || currentUser?.role === "ADMIN";
-
-  const notices: Notice[] = JSON.parse(localStorage.getItem("notices") || "[]");
-
-  const editNotice = notices.find((notice) => notice.id === Number(noticeId));
+  const isAdmin = currentUser?.role === "ADMIN";
 
   const [form, setForm] = useState({
-    title: editNotice?.title || "",
-    content: editNotice?.content || "",
+    title: "",
+    content: "",
   });
+
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!isAdmin) {
+      alert("관리자만 공지사항을 작성할 수 있습니다.");
+      navigate("/notices");
+    }
+  }, [isAdmin, navigate]);
+
+  useEffect(() => {
+    const fetchEditNotice = async () => {
+      if (!noticeId) return;
+
+      try {
+        setIsLoading(true);
+
+        const data: Notice = await getNoticeDetail(Number(noticeId));
+
+        setForm({
+          title: data.title,
+          content: data.content,
+        });
+      } catch (error) {
+        console.error(error);
+        alert(error instanceof Error ? error.message : "공지사항 조회 실패");
+        navigate("/notices");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchEditNotice();
+  }, [noticeId, navigate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -62,7 +84,7 @@ function NoticeWritePage() {
     });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!isAdmin) {
@@ -76,69 +98,37 @@ function NoticeWritePage() {
       return;
     }
 
-    if (isEditMode) {
-      if (!editNotice) {
-        alert("수정할 공지사항을 찾을 수 없습니다.");
-        navigate("/notices");
+    try {
+      setIsLoading(true);
+
+      if (isEditMode && noticeId) {
+        const updatedNotice: Notice = await updateNotice(Number(noticeId), {
+          title: form.title,
+          content: form.content,
+        });
+
+        alert("공지사항 수정 완료");
+        navigate(`/notices/${updatedNotice.id}`);
         return;
       }
 
-      const updatedNotices = notices.map((notice) =>
-        notice.id === editNotice.id
-          ? {
-              ...notice,
-              title: form.title,
-              content: form.content,
-            }
-          : notice
-      );
+      await createNotice({
+        title: form.title,
+        content: form.content,
+      });
 
-      localStorage.setItem("notices", JSON.stringify(updatedNotices));
-
-      alert("공지사항 수정 완료");
-      navigate(`/notices/${editNotice.id}`);
-      return;
+      alert("공지사항 작성 완료");
+      navigate("/notices");
+    } catch (error) {
+      console.error(error);
+      alert(error instanceof Error ? error.message : "요청 실패");
+    } finally {
+      setIsLoading(false);
     }
-
-    const newNotice: Notice = {
-      id: Date.now(),
-      title: form.title,
-      content: form.content,
-      writer: "관리자",
-      writerEmail: ADMIN_EMAIL,
-      createdAt: getTodayDate(),
-    };
-
-    localStorage.setItem("notices", JSON.stringify([newNotice, ...notices]));
-
-    alert("공지사항 작성 완료");
-    navigate("/notices");
   };
 
   if (!isAdmin) {
-    return (
-      <div className="notice-page">
-        <Header />
-
-        <main className="notice-container">
-          <section className="notice-hero">
-            <div>
-              <p className="notice-badge">NOTICE</p>
-              <h1>접근 제한</h1>
-              <p>관리자만 접근할 수 있는 페이지입니다.</p>
-            </div>
-
-            <button
-              type="button"
-              className="notice-write-button"
-              onClick={() => navigate("/notices")}
-            >
-              공지사항으로 이동
-            </button>
-          </section>
-        </main>
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -149,7 +139,8 @@ function NoticeWritePage() {
         <section className="notice-hero">
           <div>
             <p className="notice-badge">NOTICE</p>
-
+            <h1>{isEditMode ? "공지사항 수정" : "공지사항 작성"}</h1>
+            <p>공지사항 제목과 내용을 입력해주세요.</p>
           </div>
         </section>
 
@@ -160,6 +151,7 @@ function NoticeWritePage() {
               placeholder="공지사항 제목"
               value={form.title}
               onChange={handleChange}
+              disabled={isLoading}
             />
 
             <textarea
@@ -167,9 +159,12 @@ function NoticeWritePage() {
               placeholder="공지사항 내용"
               value={form.content}
               onChange={handleChange}
+              disabled={isLoading}
             />
 
-            <button type="submit">{isEditMode ? "수정" : "작성"}</button>
+            <button type="submit" disabled={isLoading}>
+              {isLoading ? "저장 중..." : isEditMode ? "수정" : "작성"}
+            </button>
           </form>
         </section>
       </main>
