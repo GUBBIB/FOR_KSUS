@@ -55,6 +55,7 @@ public class UserServiceImp implements UserService {
                 .email(user.getEmail())
                 .name(user.getName())
                 .nickname(user.getNickname())
+                .role(user.getRole().getRoleName())
                 .build();
 
 
