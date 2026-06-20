@@ -2,11 +2,13 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import { getNotices } from "../api/noticeApi";
+import { getMyProfile } from "../api/userApi";
 import "./NoticePage.css";
 
 type User = {
   email: string;
   nickname: string;
+  name: string;
   role?: string;
 };
 
@@ -23,14 +25,15 @@ type SortType = "latest" | "oldest";
 
 const NOTICES_PER_PAGE = 10;
 
+const checkIsAdmin = (role?: string) => {
+  return role === "ADMIN" || role === "ROLE_ADMIN";
+};
+
 function NoticePage() {
   const navigate = useNavigate();
 
-  const currentUser: User | null = JSON.parse(
-    localStorage.getItem("currentUser") || "null"
-  );
-
-  const isAdmin = currentUser?.role === "ADMIN";
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isRoleChecked, setIsRoleChecked] = useState(false);
 
   const [notices, setNotices] = useState<Notice[]>([]);
   const [searchKeyword, setSearchKeyword] = useState("");
@@ -38,6 +41,26 @@ function NoticePage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const user: User = await getMyProfile();
+
+        console.log("현재 로그인 유저:", user);
+        console.log("현재 role:", user.role);
+
+        setIsAdmin(checkIsAdmin(user.role));
+      } catch (error) {
+        console.error("관리자 확인 실패:", error);
+        setIsAdmin(false);
+      } finally {
+        setIsRoleChecked(true);
+      }
+    };
+
+    fetchUserRole();
+  }, []);
 
   useEffect(() => {
     const fetchNotices = async () => {
@@ -113,7 +136,7 @@ function NoticePage() {
             <p>FOR KSUS의 중요한 안내와 업데이트를 확인하세요.</p>
           </div>
 
-          {isAdmin && (
+          {isRoleChecked && isAdmin && (
             <button
               type="button"
               className="notice-write-button"

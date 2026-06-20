@@ -6,11 +6,13 @@ import {
   getNoticeDetail,
   updateNotice,
 } from "../api/noticeApi";
+import { getMyProfile } from "../api/userApi";
 import "./NoticePage.css";
 
 type User = {
   email: string;
   nickname: string;
+  name: string;
   role?: string;
 };
 
@@ -23,6 +25,10 @@ type Notice = {
   createdAt: string;
 };
 
+const checkIsAdmin = (role?: string) => {
+  return role === "ADMIN" || role === "ROLE_ADMIN";
+};
+
 function NoticeWritePage() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -30,11 +36,8 @@ function NoticeWritePage() {
   const noticeId = searchParams.get("noticeId");
   const isEditMode = Boolean(noticeId);
 
-  const currentUser: User | null = JSON.parse(
-    localStorage.getItem("currentUser") || "null"
-  );
-
-  const isAdmin = currentUser?.role === "ADMIN";
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [isCheckingAdmin, setIsCheckingAdmin] = useState(true);
 
   const [form, setForm] = useState({
     title: "",
@@ -44,11 +47,31 @@ function NoticeWritePage() {
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!isAdmin) {
-      alert("관리자만 공지사항을 작성할 수 있습니다.");
-      navigate("/notices");
-    }
-  }, [isAdmin, navigate]);
+    const checkAdmin = async () => {
+      try {
+        const user: User = await getMyProfile();
+
+        console.log("공지 작성 접근 유저:", user);
+        console.log("공지 작성 role:", user.role);
+
+        if (!checkIsAdmin(user.role)) {
+          alert("관리자만 접근 가능합니다.");
+          navigate("/notices");
+          return;
+        }
+
+        setIsAdmin(true);
+      } catch (error) {
+        console.error(error);
+        alert("로그인 후 이용해주세요.");
+        navigate("/login");
+      } finally {
+        setIsCheckingAdmin(false);
+      }
+    };
+
+    checkAdmin();
+  }, [navigate]);
 
   useEffect(() => {
     const fetchEditNotice = async () => {
@@ -126,6 +149,10 @@ function NoticeWritePage() {
       setIsLoading(false);
     }
   };
+
+  if (isCheckingAdmin) {
+    return null;
+  }
 
   if (!isAdmin) {
     return null;

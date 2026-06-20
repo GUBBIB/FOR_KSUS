@@ -2,12 +2,14 @@ import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Header from "../components/Header";
 import { deleteNotice, getNoticeDetail } from "../api/noticeApi";
+import { getMyProfile } from "../api/userApi";
 import "./NoticePage.css";
 
 type User = {
   email: string;
   nickname: string;
-  role?: string;
+  name: string;
+  role: "USER" | "ADMIN";
 };
 
 type Notice = {
@@ -23,15 +25,23 @@ function NoticeDetailPage() {
   const navigate = useNavigate();
   const { noticeId } = useParams();
 
-  const currentUser: User | null = JSON.parse(
-    localStorage.getItem("currentUser") || "null"
-  );
-
-  const isAdmin = currentUser?.role === "ADMIN";
-
+  const [isAdmin, setIsAdmin] = useState(false);
   const [notice, setNotice] = useState<Notice | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  useEffect(() => {
+    const fetchUserRole = async () => {
+      try {
+        const user: User = await getMyProfile();
+        setIsAdmin(user.role === "ADMIN");
+      } catch {
+        setIsAdmin(false);
+      }
+    };
+
+    fetchUserRole();
+  }, []);
 
   useEffect(() => {
     const fetchNotice = async () => {
