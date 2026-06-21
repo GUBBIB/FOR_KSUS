@@ -317,10 +317,9 @@ function MainPage() {
         <section className="map-hero-card">
           <div className="map-hero-text">
             <p className="hero-badge">CAMPUS MAP</p>
-            <h1>공대 맵보기</h1>
+            <h1>경성대학생 정보 사이트</h1>
             <p>
-              공과대학 주변 건물, 주차장, 흡연장, 편의시설 위치를
-              확인하세요.
+              학교 버스, 빈 강의실, 공지사항, 커뮤니티 등 다양한 정보를 한눈에 확인하세요!
             </p>
           </div>
 
