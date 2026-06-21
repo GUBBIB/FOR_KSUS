@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import Header from "../components/Header";
 import { getBusStops, getNextBus } from "../api/busApi";
 import { getPosts } from "../api/boardApi";
+import { getNotices } from "../api/noticeApi";
 import {
   getBuildings,
   getClassrooms,
@@ -13,6 +14,9 @@ import "./MainPage.css";
 type Notice = {
   id: number;
   title: string;
+  content?: string;
+  writer?: string;
+  viewCount?: number;
   createdAt: string;
 };
 
@@ -92,7 +96,9 @@ const getBusProgress = (remainingMinutes: number) => {
 };
 
 function MainPage() {
-  const notices: Notice[] = JSON.parse(localStorage.getItem("notices") || "[]");
+  const [latestNotices, setLatestNotices] = useState<Notice[]>([]);
+  const [isNoticeLoading, setIsNoticeLoading] = useState(false);
+  const [noticeError, setNoticeError] = useState("");
 
   const [popularPosts, setPopularPosts] = useState<Post[]>([]);
   const [isPopularPostLoading, setIsPopularPostLoading] = useState(false);
@@ -106,7 +112,39 @@ function MainPage() {
   const [isClassroomLoading, setIsClassroomLoading] = useState(false);
   const [classroomError, setClassroomError] = useState("");
 
-  const latestNotices = notices.slice(0, 3);
+  useEffect(() => {
+    const fetchLatestNotices = async () => {
+      try {
+        setIsNoticeLoading(true);
+        setNoticeError("");
+
+        const data = await getNotices();
+        const noticeList: Notice[] = Array.isArray(data) ? data : [data];
+
+        const latestTwoNotices = [...noticeList]
+          .sort(
+            (a, b) =>
+              new Date(b.createdAt).getTime() -
+              new Date(a.createdAt).getTime()
+          )
+          .slice(0, 2);
+
+        setLatestNotices(latestTwoNotices);
+      } catch (error) {
+        console.error(error);
+
+        setNoticeError(
+          error instanceof Error
+            ? error.message
+            : "최신 공지사항을 불러오지 못했습니다."
+        );
+      } finally {
+        setIsNoticeLoading(false);
+      }
+    };
+
+    fetchLatestNotices();
+  }, []);
 
   useEffect(() => {
     const fetchPopularPosts = async () => {
@@ -125,11 +163,11 @@ function MainPage() {
       } catch (error) {
         console.error(error);
 
-        if (error instanceof Error) {
-          setPopularPostError(error.message);
-        } else {
-          setPopularPostError("인기 게시글을 불러오지 못했습니다.");
-        }
+        setPopularPostError(
+          error instanceof Error
+            ? error.message
+            : "인기 게시글을 불러오지 못했습니다."
+        );
       } finally {
         setIsPopularPostLoading(false);
       }
@@ -185,11 +223,11 @@ function MainPage() {
       } catch (error) {
         console.error(error);
 
-        if (error instanceof Error) {
-          setBusError(error.message);
-        } else {
-          setBusError("버스 정보를 불러오지 못했습니다.");
-        }
+        setBusError(
+          error instanceof Error
+            ? error.message
+            : "버스 정보를 불러오지 못했습니다."
+        );
 
         setBusInfos([]);
       } finally {
@@ -258,11 +296,11 @@ function MainPage() {
       } catch (error) {
         console.error(error);
 
-        if (error instanceof Error) {
-          setClassroomError(error.message);
-        } else {
-          setClassroomError("빈 강의실 정보를 불러오지 못했습니다.");
-        }
+        setClassroomError(
+          error instanceof Error
+            ? error.message
+            : "빈 강의실 정보를 불러오지 못했습니다."
+        );
       } finally {
         setIsClassroomLoading(false);
       }
@@ -278,10 +316,12 @@ function MainPage() {
       <main className="main-container">
         <section className="map-hero-card">
           <div className="map-hero-text">
-            <p className="hero-badge">
-           경성대학교 학생들을 위한 사이트</p> 
-           <h1>학교 생활, 이젠 편리하게!</h1>
-            <p> 경성대 캠퍼스 맵, 셔틀버스 정보, 빈 강의실 찾기 등 다양한 기능을 제공합니다. </p>
+            <p className="hero-badge">CAMPUS MAP</p>
+            <h1>공대 맵보기</h1>
+            <p>
+              공과대학 주변 건물, 주차장, 흡연장, 편의시설 위치를
+              확인하세요.
+            </p>
           </div>
 
           <Link to="/engineering-map" className="map-preview">
@@ -292,7 +332,7 @@ function MainPage() {
         <section className="dashboard-grid">
           <article className="dashboard-card bus-card">
             <div className="card-header">
-              <h2>셔틀버스 정보</h2>
+              <h2>🚌 셔틀버스 정보</h2>
               <Link to="/bus">상세보기</Link>
             </div>
 
@@ -317,7 +357,9 @@ function MainPage() {
                         </strong>
 
                         {busInfo.nextBus ? (
-                          <span>{busInfo.nextBus.remainingMinutes}분 후 도착</span>
+                          <span>
+                            {busInfo.nextBus.remainingMinutes}분 후 도착
+                          </span>
                         ) : (
                           <span>운행 종료</span>
                         )}
@@ -349,7 +391,7 @@ function MainPage() {
 
           <article className="dashboard-card classroom-card">
             <div className="card-header">
-              <h2> 빈 강의실 찾기</h2>
+              <h2>🏫 빈 강의실 찾기</h2>
               <Link to="/classrooms">조회하기</Link>
             </div>
 
@@ -377,11 +419,15 @@ function MainPage() {
 
           <article className="dashboard-card notice-card">
             <div className="card-header">
-              <h2> 최신 공지사항</h2>
+              <h2>📢 최신 공지사항</h2>
               <Link to="/notices">더보기</Link>
             </div>
 
-            {latestNotices.length === 0 ? (
+            {isNoticeLoading ? (
+              <p className="empty-text">최신 공지사항 조회 중...</p>
+            ) : noticeError ? (
+              <p className="empty-text">{noticeError}</p>
+            ) : latestNotices.length === 0 ? (
               <p className="empty-text">등록된 공지사항이 없습니다.</p>
             ) : (
               <ul>
@@ -397,7 +443,7 @@ function MainPage() {
 
           <article className="dashboard-card community-card">
             <div className="card-header">
-              <h2>커뮤니티</h2>
+              <h2>🔥 인기 커뮤니티 글</h2>
               <Link to="/community">더보기</Link>
             </div>
 
